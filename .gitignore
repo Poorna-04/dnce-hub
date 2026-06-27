@@ -1,0 +1,64 @@
+# ─── Java / Maven ─────────────────────────────────────────────────────────────
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+replay_pid*
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ─── Spring Boot / IDE ────────────────────────────────────────────────────────
+*.iml
+.idea/
+*.iws
+.project
+.classpath
+.settings/
+bin/
+.vscode/settings.json
+
+# Application secrets — never commit these
+backend/src/main/resources/application-local.yml
+backend/src/main/resources/application-secrets.yml
+*.env
+.env
+.env.*
+!.env.example
+
+# ─── Node / Next.js ───────────────────────────────────────────────────────────
+node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.eslintcache
+.vercel
+
+# ─── Docker ───────────────────────────────────────────────────────────────────
+docker/data/
+
+# ─── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# ─── Logs ─────────────────────────────────────────────────────────────────────
+logs/
+*.log
