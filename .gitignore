@@ -27,6 +27,7 @@ bin/
 .vscode/settings.json
 
 # Application secrets — never commit these
+backend/src/main/resources/application-dev.yml
 backend/src/main/resources/application-local.yml
 backend/src/main/resources/application-secrets.yml
 *.env
