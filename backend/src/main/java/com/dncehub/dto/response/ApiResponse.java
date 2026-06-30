@@ -1,11 +1,9 @@
 package com.dncehub.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Getter;
 
 import java.time.Instant;
 
-@Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)//null fields are omitted from the JSON response
 public class ApiResponse<T> {
 
@@ -19,6 +17,22 @@ public class ApiResponse<T> {
         this.message = message;
         this.data = data;
         this.timestamp = Instant.now().toString();
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
     }
 
     public static <T> ApiResponse<T> ok(T data) {
