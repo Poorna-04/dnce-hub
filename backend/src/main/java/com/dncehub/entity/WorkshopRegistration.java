@@ -1,18 +1,12 @@
 package com.dncehub.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "workshop_registrations")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class WorkshopRegistration {
 
     @Id
@@ -28,10 +22,21 @@ public class WorkshopRegistration {
     private StudentProfile student;
 
     // PENDING, PAID, REFUNDED
-    @Builder.Default
     private String paymentStatus = "PENDING";
 
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime registeredAt;
+
+    public WorkshopRegistration() {}
+
+    public Long getId() { return id; }
+    public Workshop getWorkshop() { return workshop; }
+    public StudentProfile getStudent() { return student; }
+    public String getPaymentStatus() { return paymentStatus; }
+    public LocalDateTime getRegisteredAt() { return registeredAt; }
+
+    public void setWorkshop(Workshop workshop) { this.workshop = workshop; }
+    public void setStudent(StudentProfile student) { this.student = student; }
+    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
 }

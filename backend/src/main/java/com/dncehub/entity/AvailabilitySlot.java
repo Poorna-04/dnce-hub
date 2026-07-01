@@ -2,18 +2,12 @@ package com.dncehub.entity;
 
 import com.dncehub.entity.enums.SlotType;
 import jakarta.persistence.*;
-import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
 @Table(name = "availability_slots")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class AvailabilitySlot {
 
     @Id
@@ -41,6 +35,24 @@ public class AvailabilitySlot {
     private LocalTime endTime;
 
     @Column(nullable = false)
-    @Builder.Default
     private boolean available = true;
+
+    public AvailabilitySlot() {}
+
+    public Long getId() { return id; }
+    public InstructorProfile getInstructor() { return instructor; }
+    public SlotType getSlotType() { return slotType; }
+    public Integer getDayOfWeek() { return dayOfWeek; }
+    public LocalDate getSlotDate() { return slotDate; }
+    public LocalTime getStartTime() { return startTime; }
+    public LocalTime getEndTime() { return endTime; }
+    public boolean isAvailable() { return available; }
+
+    public void setInstructor(InstructorProfile instructor) { this.instructor = instructor; }
+    public void setSlotType(SlotType slotType) { this.slotType = slotType; }
+    public void setDayOfWeek(Integer dayOfWeek) { this.dayOfWeek = dayOfWeek; }
+    public void setSlotDate(LocalDate slotDate) { this.slotDate = slotDate; }
+    public void setStartTime(LocalTime startTime) { this.startTime = startTime; }
+    public void setEndTime(LocalTime endTime) { this.endTime = endTime; }
+    public void setAvailable(boolean available) { this.available = available; }
 }

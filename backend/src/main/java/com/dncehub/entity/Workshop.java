@@ -2,7 +2,6 @@ package com.dncehub.entity;
 
 import com.dncehub.entity.enums.WorkshopStatus;
 import jakarta.persistence.*;
-import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
@@ -12,11 +11,6 @@ import java.time.LocalTime;
 
 @Entity
 @Table(name = "workshops")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Workshop {
 
     @Id
@@ -34,16 +28,10 @@ public class Workshop {
     private String description;
 
     private String danceStyle;
-
     private String posterUrl;
-
     private String venue;
-
     private String city;
-
-    @Builder.Default
     private boolean online = false;
-
     private String meetingLink;
 
     @Column(nullable = false)
@@ -62,12 +50,10 @@ public class Workshop {
     private Integer totalSeats;
 
     @Column(nullable = false)
-    @Builder.Default
     private Integer registeredSeats = 0;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @Builder.Default
     private WorkshopStatus status = WorkshopStatus.UPCOMING;
 
     @Version
@@ -76,4 +62,43 @@ public class Workshop {
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    public Workshop() {}
+
+    public Long getId() { return id; }
+    public InstructorProfile getInstructor() { return instructor; }
+    public String getTitle() { return title; }
+    public String getDescription() { return description; }
+    public String getDanceStyle() { return danceStyle; }
+    public String getPosterUrl() { return posterUrl; }
+    public String getVenue() { return venue; }
+    public String getCity() { return city; }
+    public boolean isOnline() { return online; }
+    public String getMeetingLink() { return meetingLink; }
+    public LocalDate getWorkshopDate() { return workshopDate; }
+    public LocalTime getStartTime() { return startTime; }
+    public LocalTime getEndTime() { return endTime; }
+    public BigDecimal getPrice() { return price; }
+    public Integer getTotalSeats() { return totalSeats; }
+    public Integer getRegisteredSeats() { return registeredSeats; }
+    public WorkshopStatus getStatus() { return status; }
+    public Long getVersion() { return version; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+
+    public void setInstructor(InstructorProfile instructor) { this.instructor = instructor; }
+    public void setTitle(String title) { this.title = title; }
+    public void setDescription(String description) { this.description = description; }
+    public void setDanceStyle(String danceStyle) { this.danceStyle = danceStyle; }
+    public void setPosterUrl(String posterUrl) { this.posterUrl = posterUrl; }
+    public void setVenue(String venue) { this.venue = venue; }
+    public void setCity(String city) { this.city = city; }
+    public void setOnline(boolean online) { this.online = online; }
+    public void setMeetingLink(String meetingLink) { this.meetingLink = meetingLink; }
+    public void setWorkshopDate(LocalDate workshopDate) { this.workshopDate = workshopDate; }
+    public void setStartTime(LocalTime startTime) { this.startTime = startTime; }
+    public void setEndTime(LocalTime endTime) { this.endTime = endTime; }
+    public void setPrice(BigDecimal price) { this.price = price; }
+    public void setTotalSeats(Integer totalSeats) { this.totalSeats = totalSeats; }
+    public void setRegisteredSeats(Integer registeredSeats) { this.registeredSeats = registeredSeats; }
+    public void setStatus(WorkshopStatus status) { this.status = status; }
 }

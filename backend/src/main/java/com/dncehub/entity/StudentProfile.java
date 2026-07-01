@@ -1,18 +1,12 @@
 package com.dncehub.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "student_profiles")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class StudentProfile {
 
     @Id
@@ -35,6 +29,18 @@ public class StudentProfile {
             joinColumns = @JoinColumn(name = "student_id"),
             inverseJoinColumns = @JoinColumn(name = "instructor_id")
     )
-    @Builder.Default
     private List<InstructorProfile> savedInstructors = new ArrayList<>();
+
+    public StudentProfile() {}
+
+    public Long getId() { return id; }
+    public User getUser() { return user; }
+    public String getDanceInterests() { return danceInterests; }
+    public String getBio() { return bio; }
+    public List<InstructorProfile> getSavedInstructors() { return savedInstructors; }
+
+    public void setUser(User user) { this.user = user; }
+    public void setDanceInterests(String danceInterests) { this.danceInterests = danceInterests; }
+    public void setBio(String bio) { this.bio = bio; }
+    public void setSavedInstructors(List<InstructorProfile> savedInstructors) { this.savedInstructors = savedInstructors; }
 }

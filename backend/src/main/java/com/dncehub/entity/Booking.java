@@ -2,7 +2,6 @@ package com.dncehub.entity;
 
 import com.dncehub.entity.enums.BookingStatus;
 import jakarta.persistence.*;
-import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -12,11 +11,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "bookings")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Booking {
 
     @Id
@@ -27,7 +21,6 @@ public class Booking {
     @JoinColumn(name = "student_id", nullable = false)
     private StudentProfile student;
 
-    // Denormalized FK — avoids joining through StudentProfile when querying instructor's bookings
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "instructor_id", nullable = false)
     private InstructorProfile instructor;
@@ -36,13 +29,11 @@ public class Booking {
     @JoinColumn(name = "slot_id", nullable = false)
     private AvailabilitySlot slot;
 
-    // Which day this booking is for (matters for RECURRING slots)
     @Column(nullable = false)
     private LocalDate bookingDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @Builder.Default
     private BookingStatus status = BookingStatus.PENDING;
 
     @Column(precision = 10, scale = 2)
@@ -60,4 +51,26 @@ public class Booking {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public Booking() {}
+
+    public Long getId() { return id; }
+    public StudentProfile getStudent() { return student; }
+    public InstructorProfile getInstructor() { return instructor; }
+    public AvailabilitySlot getSlot() { return slot; }
+    public LocalDate getBookingDate() { return bookingDate; }
+    public BookingStatus getStatus() { return status; }
+    public BigDecimal getTotalAmount() { return totalAmount; }
+    public String getCancelledBy() { return cancelledBy; }
+    public Long getVersion() { return version; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+    public void setStudent(StudentProfile student) { this.student = student; }
+    public void setInstructor(InstructorProfile instructor) { this.instructor = instructor; }
+    public void setSlot(AvailabilitySlot slot) { this.slot = slot; }
+    public void setBookingDate(LocalDate bookingDate) { this.bookingDate = bookingDate; }
+    public void setStatus(BookingStatus status) { this.status = status; }
+    public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
+    public void setCancelledBy(String cancelledBy) { this.cancelledBy = cancelledBy; }
 }
