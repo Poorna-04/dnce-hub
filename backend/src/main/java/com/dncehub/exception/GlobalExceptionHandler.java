@@ -31,6 +31,14 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(message));
     }
 
+    // Handles bad business-logic arguments (e.g. endTime before startTime)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity
+                .badRequest()
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
     // Catch-all for unexpected errors
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception ex) {
