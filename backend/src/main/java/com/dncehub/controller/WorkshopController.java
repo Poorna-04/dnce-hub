@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/workshops")
@@ -30,7 +31,7 @@ public class WorkshopController {
 
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<List<WorkshopResponse>>> myWorkshops(
-            @RequestParam Long instructorUserId) {
+            @RequestParam UUID instructorUserId) {
         return ResponseEntity.ok(ApiResponse.ok(workshopService.getMyWorkshops(instructorUserId)));
     }
 
@@ -63,7 +64,7 @@ public class WorkshopController {
     @PostMapping("/{id}/register")
     public ResponseEntity<ApiResponse<Void>> register(
             @PathVariable Long id,
-            @RequestParam Long studentUserId) {
+            @RequestParam UUID studentUserId) {
         workshopService.register(id, studentUserId);
         return ResponseEntity.ok(ApiResponse.ok("Registered successfully", null));
     }
@@ -71,7 +72,7 @@ public class WorkshopController {
     @DeleteMapping("/{id}/register")
     public ResponseEntity<ApiResponse<Void>> cancelRegistration(
             @PathVariable Long id,
-            @RequestParam Long studentUserId) {
+            @RequestParam UUID studentUserId) {
         workshopService.cancelRegistration(id, studentUserId);
         return ResponseEntity.ok(ApiResponse.ok("Registration cancelled", null));
     }

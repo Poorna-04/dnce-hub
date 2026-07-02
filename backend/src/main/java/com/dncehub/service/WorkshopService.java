@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class WorkshopService {
@@ -95,7 +96,7 @@ public class WorkshopService {
      * claim the last seat without one of them failing with a stale-version error.
      */
     @Transactional
-    public void register(Long workshopId, Long studentUserId) {
+    public void register(Long workshopId, UUID studentUserId) {
         Workshop workshop = findWorkshop(workshopId);
 
         if (workshop.getStatus() != WorkshopStatus.UPCOMING) {
@@ -122,7 +123,7 @@ public class WorkshopService {
     }
 
     @Transactional
-    public void cancelRegistration(Long workshopId, Long studentUserId) {
+    public void cancelRegistration(Long workshopId, UUID studentUserId) {
         StudentProfile student = studentProfileRepository.findByUserId(studentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
 
@@ -138,7 +139,7 @@ public class WorkshopService {
     }
 
     @Transactional(readOnly = true)
-    public List<WorkshopResponse> getMyWorkshops(Long instructorUserId) {
+    public List<WorkshopResponse> getMyWorkshops(UUID instructorUserId) {
         InstructorProfile instructor = instructorRepository.findByUserId(instructorUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.INSTRUCTOR_PROFILE_NOT_FOUND));
 

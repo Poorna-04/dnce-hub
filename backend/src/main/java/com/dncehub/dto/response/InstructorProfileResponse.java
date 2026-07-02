@@ -4,11 +4,12 @@ import com.dncehub.entity.enums.TeachingMode;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 public class InstructorProfileResponse {
 
     private Long id;
-    private Long userId;
+    private UUID userId;
     private String fullName;
     private String email;
     private Integer experienceYears;
@@ -18,7 +19,7 @@ public class InstructorProfileResponse {
     private TeachingMode teachingMode;
 
     public Long getId() { return id; }
-    public Long getUserId() { return userId; }
+    public UUID getUserId() { return userId; }
     public String getFullName() { return fullName; }
     public String getEmail() { return email; }
     public Integer getExperienceYears() { return experienceYears; }
@@ -31,7 +32,7 @@ public class InstructorProfileResponse {
 
     public static class Builder {
         private Long id;
-        private Long userId;
+        private UUID userId;
         private String fullName;
         private String email;
         private Integer experienceYears;
@@ -41,7 +42,7 @@ public class InstructorProfileResponse {
         private TeachingMode teachingMode;
 
         public Builder id(Long id) { this.id = id; return this; }
-        public Builder userId(Long userId) { this.userId = userId; return this; }
+        public Builder userId(UUID userId) { this.userId = userId; return this; }
         public Builder fullName(String fullName) { this.fullName = fullName; return this; }
         public Builder email(String email) { this.email = email; return this; }
         public Builder experienceYears(Integer e) { this.experienceYears = e; return this; }

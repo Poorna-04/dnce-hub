@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/bookings")
@@ -53,13 +54,13 @@ public class BookingController {
 
     @GetMapping("/my/upcoming")
     public ResponseEntity<ApiResponse<List<BookingResponse>>> upcoming(
-            @RequestParam Long studentUserId) {
+            @RequestParam UUID studentUserId) {
         return ResponseEntity.ok(ApiResponse.ok(bookingService.getUpcoming(studentUserId)));
     }
 
     @GetMapping("/my/history")
     public ResponseEntity<ApiResponse<List<BookingResponse>>> history(
-            @RequestParam Long studentUserId) {
+            @RequestParam UUID studentUserId) {
         return ResponseEntity.ok(ApiResponse.ok(bookingService.getHistory(studentUserId)));
     }
 }

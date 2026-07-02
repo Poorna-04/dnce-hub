@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class StudentProfileService {
@@ -34,7 +35,7 @@ public class StudentProfileService {
     }
 
     @Transactional(readOnly = true)
-    public StudentProfileResponse getByUserId(Long userId) {
+    public StudentProfileResponse getByUserId(UUID userId) {
         StudentProfile profile = studentProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
         return toResponse(profile);
@@ -58,7 +59,7 @@ public class StudentProfileService {
     }
 
     @Transactional
-    public StudentProfileResponse update(Long userId, StudentProfileRequest request) {
+    public StudentProfileResponse update(UUID userId, StudentProfileRequest request) {
         StudentProfile profile = studentProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
 
@@ -69,14 +70,14 @@ public class StudentProfileService {
     }
 
     @Transactional
-    public void delete(Long userId) {
+    public void delete(UUID userId) {
         StudentProfile profile = studentProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
         studentProfileRepository.delete(profile);
     }
 
     @Transactional
-    public void saveInstructor(Long userId, Long instructorId) {
+    public void saveInstructor(UUID userId, Long instructorId) {
         StudentProfile student = studentProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
 
@@ -90,7 +91,7 @@ public class StudentProfileService {
     }
 
     @Transactional
-    public void unsaveInstructor(Long userId, Long instructorId) {
+    public void unsaveInstructor(UUID userId, Long instructorId) {
         StudentProfile student = studentProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
 
@@ -99,7 +100,7 @@ public class StudentProfileService {
     }
 
     @Transactional(readOnly = true)
-    public List<InstructorProfileResponse> getSavedInstructors(Long userId) {
+    public List<InstructorProfileResponse> getSavedInstructors(UUID userId) {
         StudentProfile student = studentProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
 

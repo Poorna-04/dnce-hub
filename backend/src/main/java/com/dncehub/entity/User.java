@@ -7,14 +7,16 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(updatable = false, nullable = false)
+    private UUID id;
 
     @Column(unique = true, nullable = false)
     private String email;
@@ -39,7 +41,7 @@ public class User {
 
     public User() {}
 
-    public Long getId() { return id; }
+    public UUID getId() { return id; }
     public String getEmail() { return email; }
     public String getFullName() { return fullName; }
     public Role getRole() { return role; }

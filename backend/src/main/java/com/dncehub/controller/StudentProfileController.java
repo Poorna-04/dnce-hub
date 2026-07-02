@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/students")
@@ -24,7 +25,7 @@ public class StudentProfileController {
 
     @GetMapping("/profile")
     public ResponseEntity<ApiResponse<StudentProfileResponse>> getProfile(
-            @RequestParam Long userId) {
+            @RequestParam UUID userId) {
         return ResponseEntity.ok(ApiResponse.ok(studentProfileService.getByUserId(userId)));
     }
 
@@ -38,20 +39,20 @@ public class StudentProfileController {
 
     @PutMapping("/profile")
     public ResponseEntity<ApiResponse<StudentProfileResponse>> update(
-            @RequestParam Long userId,
+            @RequestParam UUID userId,
             @RequestBody StudentProfileRequest request) {
         return ResponseEntity.ok(ApiResponse.ok("Student profile updated", studentProfileService.update(userId, request)));
     }
 
     @DeleteMapping("/profile")
-    public ResponseEntity<ApiResponse<Void>> delete(@RequestParam Long userId) {
+    public ResponseEntity<ApiResponse<Void>> delete(@RequestParam UUID userId) {
         studentProfileService.delete(userId);
         return ResponseEntity.ok(ApiResponse.ok("Student profile deleted", null));
     }
 
     @PostMapping("/saved-instructors/{instructorId}")
     public ResponseEntity<ApiResponse<Void>> saveInstructor(
-            @RequestParam Long userId,
+            @RequestParam UUID userId,
             @PathVariable Long instructorId) {
         studentProfileService.saveInstructor(userId, instructorId);
         return ResponseEntity.ok(ApiResponse.ok("Instructor saved", null));
@@ -59,7 +60,7 @@ public class StudentProfileController {
 
     @DeleteMapping("/saved-instructors/{instructorId}")
     public ResponseEntity<ApiResponse<Void>> unsaveInstructor(
-            @RequestParam Long userId,
+            @RequestParam UUID userId,
             @PathVariable Long instructorId) {
         studentProfileService.unsaveInstructor(userId, instructorId);
         return ResponseEntity.ok(ApiResponse.ok("Instructor removed from saved", null));
@@ -67,7 +68,7 @@ public class StudentProfileController {
 
     @GetMapping("/saved-instructors")
     public ResponseEntity<ApiResponse<List<InstructorProfileResponse>>> getSavedInstructors(
-            @RequestParam Long userId) {
+            @RequestParam UUID userId) {
         return ResponseEntity.ok(ApiResponse.ok(studentProfileService.getSavedInstructors(userId)));
     }
 }

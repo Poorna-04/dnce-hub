@@ -8,12 +8,13 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.UUID;
 
 public class WorkshopRequest {
 
     // Temporary until auth — replaced by JWT principal later
     @NotNull(message = "instructorUserId is required")
-    private Long instructorUserId;
+    private UUID instructorUserId;
 
     @NotBlank(message = "title is required")
     private String title;
@@ -46,7 +47,7 @@ public class WorkshopRequest {
     @Min(value = 1, message = "totalSeats must be at least 1")
     private Integer totalSeats;
 
-    public Long getInstructorUserId() { return instructorUserId; }
+    public UUID getInstructorUserId() { return instructorUserId; }
     public String getTitle() { return title; }
     public String getDescription() { return description; }
     public String getDanceStyle() { return danceStyle; }
@@ -61,7 +62,7 @@ public class WorkshopRequest {
     public BigDecimal getPrice() { return price; }
     public Integer getTotalSeats() { return totalSeats; }
 
-    public void setInstructorUserId(Long v) { this.instructorUserId = v; }
+    public void setInstructorUserId(UUID v) { this.instructorUserId = v; }
     public void setTitle(String v) { this.title = v; }
     public void setDescription(String v) { this.description = v; }
     public void setDanceStyle(String v) { this.danceStyle = v; }
