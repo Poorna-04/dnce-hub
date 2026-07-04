@@ -24,6 +24,9 @@ public class User {
     @Column(nullable = false)
     private String fullName;
 
+    // BCrypt hash — null for OAuth2-only users (they never set a password)
+    private String password;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -44,6 +47,7 @@ public class User {
     public UUID getId() { return id; }
     public String getEmail() { return email; }
     public String getFullName() { return fullName; }
+    public String getPassword() { return password; }
     public Role getRole() { return role; }
     public AccountStatus getAccountStatus() { return accountStatus; }
     public LocalDateTime getCreatedAt() { return createdAt; }
@@ -51,6 +55,7 @@ public class User {
 
     public void setEmail(String email) { this.email = email; }
     public void setFullName(String fullName) { this.fullName = fullName; }
+    public void setPassword(String password) { this.password = password; }
     public void setRole(Role role) { this.role = role; }
     public void setAccountStatus(AccountStatus accountStatus) { this.accountStatus = accountStatus; }
 
