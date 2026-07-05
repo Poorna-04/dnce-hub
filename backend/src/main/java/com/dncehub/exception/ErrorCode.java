@@ -27,6 +27,8 @@ public enum ErrorCode {
     ALREADY_REGISTERED("Already registered for this workshop", HttpStatus.CONFLICT),
 
     // Auth
+    EMAIL_ALREADY_EXISTS("An account with this email already exists", HttpStatus.CONFLICT),
+    INVALID_CREDENTIALS("Invalid email or password", HttpStatus.UNAUTHORIZED),
     INVALID_TOKEN("Invalid or expired token", HttpStatus.UNAUTHORIZED),
     ACCESS_DENIED("Access denied", HttpStatus.FORBIDDEN),
 

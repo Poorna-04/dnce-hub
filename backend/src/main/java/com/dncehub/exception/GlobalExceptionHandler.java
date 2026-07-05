@@ -2,6 +2,7 @@ package com.dncehub.exception;
 
 import com.dncehub.dto.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -29,6 +30,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .badRequest()
                 .body(ApiResponse.error(message));
+    }
+
+    // Handles wrong email/password from AuthenticationManager
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBadCredentials(BadCredentialsException ex) {
+        return ResponseEntity
+                .status(ErrorCode.INVALID_CREDENTIALS.getStatus())
+                .body(ApiResponse.error(ErrorCode.INVALID_CREDENTIALS.getMessage()));
     }
 
     // Handles bad business-logic arguments (e.g. endTime before startTime)
