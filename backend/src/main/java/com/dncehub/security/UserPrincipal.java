@@ -11,11 +11,8 @@ import java.util.UUID;
 
 /**
  * Bridges our User entity with Spring Security.
- *
- * Spring Security never works with your domain objects directly — it always
- * works with UserDetails. This class wraps User so Security can check
- * credentials, roles, and account state without knowing anything about
- * our JPA entities.
+ * Spring Security works with UserDetails — this class wraps User
+ * so Security can check credentials and roles without touching JPA entities.
  */
 public class UserPrincipal implements UserDetails {
 
@@ -33,35 +30,19 @@ public class UserPrincipal implements UserDetails {
     }
 
     public static UserPrincipal from(User user) {
-        // Spring Security expects roles prefixed with ROLE_
         List<GrantedAuthority> authorities = List.of(
                 new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
         );
-        return new UserPrincipal(
-                user.getId(),
-                user.getEmail(),
-                user.getPassword(),   // BCrypt hash, set in Commit 4
-                authorities
-        );
+        return new UserPrincipal(user.getId(), user.getEmail(), user.getPassword(), authorities);
     }
-
-    // ── our own fields ────────────────────────────────────────────────────────
 
     public UUID getId() { return id; }
 
-    // ── UserDetails contract ──────────────────────────────────────────────────
-
-    @Override
-    public String getUsername() { return email; }   // Spring uses email as username
-
-    @Override
-    public String getPassword() { return password; }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() { return authorities; }
-
-    @Override public boolean isAccountNonExpired()  { return true; }
-    @Override public boolean isAccountNonLocked()   { return true; }
+    @Override public String getUsername()  { return email; }
+    @Override public String getPassword()  { return password; }
+    @Override public Collection<? extends GrantedAuthority> getAuthorities() { return authorities; }
+    @Override public boolean isAccountNonExpired()     { return true; }
+    @Override public boolean isAccountNonLocked()      { return true; }
     @Override public boolean isCredentialsNonExpired() { return true; }
-    @Override public boolean isEnabled()             { return true; }
+    @Override public boolean isEnabled()               { return true; }
 }
