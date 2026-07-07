@@ -49,8 +49,8 @@ public class WorkshopService {
     }
 
     @Transactional
-    public WorkshopResponse create(WorkshopRequest request) {
-        InstructorProfile instructor = instructorRepository.findByUserId(request.getInstructorUserId())
+    public WorkshopResponse create(UUID instructorUserId, WorkshopRequest request) {
+        InstructorProfile instructor = instructorRepository.findByUserId(instructorUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.INSTRUCTOR_PROFILE_NOT_FOUND));
 
         if (!request.getStartTime().isBefore(request.getEndTime())) {

@@ -3,6 +3,7 @@ package com.dncehub.controller;
 import com.dncehub.dto.request.WorkshopRequest;
 import com.dncehub.dto.response.ApiResponse;
 import com.dncehub.dto.response.WorkshopResponse;
+import com.dncehub.security.SecurityUtils;
 import com.dncehub.service.WorkshopService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -10,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/workshops")
@@ -30,9 +30,9 @@ public class WorkshopController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<ApiResponse<List<WorkshopResponse>>> myWorkshops(
-            @RequestParam UUID instructorUserId) {
-        return ResponseEntity.ok(ApiResponse.ok(workshopService.getMyWorkshops(instructorUserId)));
+    public ResponseEntity<ApiResponse<List<WorkshopResponse>>> myWorkshops() {
+        return ResponseEntity.ok(ApiResponse.ok(
+                workshopService.getMyWorkshops(SecurityUtils.getCurrentUserId())));
     }
 
     @GetMapping("/{id}")
@@ -45,14 +45,16 @@ public class WorkshopController {
             @Valid @RequestBody WorkshopRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Workshop created", workshopService.create(request)));
+                .body(ApiResponse.ok("Workshop created",
+                        workshopService.create(SecurityUtils.getCurrentUserId(), request)));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<WorkshopResponse>> update(
             @PathVariable Long id,
             @Valid @RequestBody WorkshopRequest request) {
-        return ResponseEntity.ok(ApiResponse.ok("Workshop updated", workshopService.update(id, request)));
+        return ResponseEntity.ok(ApiResponse.ok("Workshop updated",
+                workshopService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
@@ -62,18 +64,14 @@ public class WorkshopController {
     }
 
     @PostMapping("/{id}/register")
-    public ResponseEntity<ApiResponse<Void>> register(
-            @PathVariable Long id,
-            @RequestParam UUID studentUserId) {
-        workshopService.register(id, studentUserId);
+    public ResponseEntity<ApiResponse<Void>> register(@PathVariable Long id) {
+        workshopService.register(id, SecurityUtils.getCurrentUserId());
         return ResponseEntity.ok(ApiResponse.ok("Registered successfully", null));
     }
 
     @DeleteMapping("/{id}/register")
-    public ResponseEntity<ApiResponse<Void>> cancelRegistration(
-            @PathVariable Long id,
-            @RequestParam UUID studentUserId) {
-        workshopService.cancelRegistration(id, studentUserId);
+    public ResponseEntity<ApiResponse<Void>> cancelRegistration(@PathVariable Long id) {
+        workshopService.cancelRegistration(id, SecurityUtils.getCurrentUserId());
         return ResponseEntity.ok(ApiResponse.ok("Registration cancelled", null));
     }
 }

@@ -3,6 +3,7 @@ package com.dncehub.controller;
 import com.dncehub.dto.request.InstructorProfileRequest;
 import com.dncehub.dto.response.ApiResponse;
 import com.dncehub.dto.response.InstructorProfileResponse;
+import com.dncehub.security.SecurityUtils;
 import com.dncehub.service.InstructorProfileService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -15,7 +16,7 @@ import java.util.List;
 @RequestMapping("/api/v1/instructors")
 public class InstructorProfileController {
 
-    private final InstructorProfileService instructorProfileService;//dto
+    private final InstructorProfileService instructorProfileService;
 
     public InstructorProfileController(InstructorProfileService instructorProfileService) {
         this.instructorProfileService = instructorProfileService;
@@ -27,7 +28,6 @@ public class InstructorProfileController {
             @RequestParam(required = false) String style) {
 
         List<InstructorProfileResponse> result;
-
         if (city != null) {
             result = instructorProfileService.searchByCity(city);
         } else if (style != null) {
@@ -35,7 +35,6 @@ public class InstructorProfileController {
         } else {
             result = instructorProfileService.getAllInstructors();
         }
-
         return ResponseEntity.ok(ApiResponse.ok(result));
     }
 
@@ -49,14 +48,16 @@ public class InstructorProfileController {
             @Valid @RequestBody InstructorProfileRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Instructor profile created", instructorProfileService.create(request)));
+                .body(ApiResponse.ok("Instructor profile created",
+                        instructorProfileService.create(SecurityUtils.getCurrentUserId(), request)));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<InstructorProfileResponse>> update(
             @PathVariable Long id,
             @Valid @RequestBody InstructorProfileRequest request) {
-        return ResponseEntity.ok(ApiResponse.ok("Instructor profile updated", instructorProfileService.update(id, request)));
+        return ResponseEntity.ok(ApiResponse.ok("Instructor profile updated",
+                instructorProfileService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")

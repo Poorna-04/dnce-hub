@@ -42,8 +42,8 @@ public class BookingService {
      * The findActiveOnSlotAndDate check is a second, application-level guard.
      */
     @Transactional
-    public BookingResponse create(BookingRequest request) {
-        StudentProfile student = studentProfileRepository.findByUserId(request.getStudentUserId())
+    public BookingResponse create(UUID studentUserId, BookingRequest request) {
+        StudentProfile student = studentProfileRepository.findByUserId(studentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
 
         AvailabilitySlot slot = slotRepository.findById(request.getSlotId())

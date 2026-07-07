@@ -42,8 +42,8 @@ public class StudentProfileService {
     }
 
     @Transactional
-    public StudentProfileResponse create(StudentProfileRequest request) {
-        User user = userRepository.findById(request.getUserId())
+    public StudentProfileResponse create(UUID userId, StudentProfileRequest request) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         if (studentProfileRepository.findByUserId(user.getId()).isPresent()) {

@@ -60,8 +60,8 @@ public class InstructorProfileService {
     }
 
     @Transactional
-    public InstructorProfileResponse create(InstructorProfileRequest request) {
-        User user = userRepository.findById(request.getUserId())
+    public InstructorProfileResponse create(UUID userId, InstructorProfileRequest request) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         if (instructorProfileRepository.findByUserId(user.getId()).isPresent()) {

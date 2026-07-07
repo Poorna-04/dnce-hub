@@ -4,6 +4,7 @@ import com.dncehub.dto.request.StudentProfileRequest;
 import com.dncehub.dto.response.ApiResponse;
 import com.dncehub.dto.response.InstructorProfileResponse;
 import com.dncehub.dto.response.StudentProfileResponse;
+import com.dncehub.security.SecurityUtils;
 import com.dncehub.service.StudentProfileService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/students")
@@ -24,9 +24,9 @@ public class StudentProfileController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<ApiResponse<StudentProfileResponse>> getProfile(
-            @RequestParam UUID userId) {
-        return ResponseEntity.ok(ApiResponse.ok(studentProfileService.getByUserId(userId)));
+    public ResponseEntity<ApiResponse<StudentProfileResponse>> getProfile() {
+        return ResponseEntity.ok(ApiResponse.ok(
+                studentProfileService.getByUserId(SecurityUtils.getCurrentUserId())));
     }
 
     @PostMapping("/profile")
@@ -34,41 +34,38 @@ public class StudentProfileController {
             @Valid @RequestBody StudentProfileRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Student profile created", studentProfileService.create(request)));
+                .body(ApiResponse.ok("Student profile created",
+                        studentProfileService.create(SecurityUtils.getCurrentUserId(), request)));
     }
 
     @PutMapping("/profile")
     public ResponseEntity<ApiResponse<StudentProfileResponse>> update(
-            @RequestParam UUID userId,
             @RequestBody StudentProfileRequest request) {
-        return ResponseEntity.ok(ApiResponse.ok("Student profile updated", studentProfileService.update(userId, request)));
+        return ResponseEntity.ok(ApiResponse.ok("Student profile updated",
+                studentProfileService.update(SecurityUtils.getCurrentUserId(), request)));
     }
 
     @DeleteMapping("/profile")
-    public ResponseEntity<ApiResponse<Void>> delete(@RequestParam UUID userId) {
-        studentProfileService.delete(userId);
+    public ResponseEntity<ApiResponse<Void>> delete() {
+        studentProfileService.delete(SecurityUtils.getCurrentUserId());
         return ResponseEntity.ok(ApiResponse.ok("Student profile deleted", null));
     }
 
     @PostMapping("/saved-instructors/{instructorId}")
-    public ResponseEntity<ApiResponse<Void>> saveInstructor(
-            @RequestParam UUID userId,
-            @PathVariable Long instructorId) {
-        studentProfileService.saveInstructor(userId, instructorId);
+    public ResponseEntity<ApiResponse<Void>> saveInstructor(@PathVariable Long instructorId) {
+        studentProfileService.saveInstructor(SecurityUtils.getCurrentUserId(), instructorId);
         return ResponseEntity.ok(ApiResponse.ok("Instructor saved", null));
     }
 
     @DeleteMapping("/saved-instructors/{instructorId}")
-    public ResponseEntity<ApiResponse<Void>> unsaveInstructor(
-            @RequestParam UUID userId,
-            @PathVariable Long instructorId) {
-        studentProfileService.unsaveInstructor(userId, instructorId);
+    public ResponseEntity<ApiResponse<Void>> unsaveInstructor(@PathVariable Long instructorId) {
+        studentProfileService.unsaveInstructor(SecurityUtils.getCurrentUserId(), instructorId);
         return ResponseEntity.ok(ApiResponse.ok("Instructor removed from saved", null));
     }
 
     @GetMapping("/saved-instructors")
-    public ResponseEntity<ApiResponse<List<InstructorProfileResponse>>> getSavedInstructors(
-            @RequestParam UUID userId) {
-        return ResponseEntity.ok(ApiResponse.ok(studentProfileService.getSavedInstructors(userId)));
+    public ResponseEntity<ApiResponse<List<InstructorProfileResponse>>> getSavedInstructors() {
+        return ResponseEntity.ok(ApiResponse.ok(
+                studentProfileService.getSavedInstructors(SecurityUtils.getCurrentUserId())));
     }
 }

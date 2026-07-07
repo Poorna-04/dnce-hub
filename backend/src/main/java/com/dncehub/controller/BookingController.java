@@ -3,6 +3,7 @@ package com.dncehub.controller;
 import com.dncehub.dto.request.BookingRequest;
 import com.dncehub.dto.response.ApiResponse;
 import com.dncehub.dto.response.BookingResponse;
+import com.dncehub.security.SecurityUtils;
 import com.dncehub.service.BookingService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -10,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/bookings")
@@ -27,7 +27,8 @@ public class BookingController {
             @Valid @RequestBody BookingRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Booking created", bookingService.create(request)));
+                .body(ApiResponse.ok("Booking created",
+                        bookingService.create(SecurityUtils.getCurrentUserId(), request)));
     }
 
     @GetMapping("/{id}")
@@ -41,10 +42,11 @@ public class BookingController {
     }
 
     @PatchMapping("/{id}/cancel")
-    public ResponseEntity<ApiResponse<BookingResponse>> cancel(
-            @PathVariable Long id,
-            @RequestParam String cancelledBy) {
-        return ResponseEntity.ok(ApiResponse.ok("Booking cancelled", bookingService.cancel(id, cancelledBy)));
+    public ResponseEntity<ApiResponse<BookingResponse>> cancel(@PathVariable Long id) {
+        // Derive who is cancelling from the JWT role — no query param needed
+        String role = SecurityUtils.getCurrentUserRole();
+        return ResponseEntity.ok(ApiResponse.ok("Booking cancelled",
+                bookingService.cancel(id, role)));
     }
 
     @PatchMapping("/{id}/complete")
@@ -53,14 +55,14 @@ public class BookingController {
     }
 
     @GetMapping("/my/upcoming")
-    public ResponseEntity<ApiResponse<List<BookingResponse>>> upcoming(
-            @RequestParam UUID studentUserId) {
-        return ResponseEntity.ok(ApiResponse.ok(bookingService.getUpcoming(studentUserId)));
+    public ResponseEntity<ApiResponse<List<BookingResponse>>> upcoming() {
+        return ResponseEntity.ok(ApiResponse.ok(
+                bookingService.getUpcoming(SecurityUtils.getCurrentUserId())));
     }
 
     @GetMapping("/my/history")
-    public ResponseEntity<ApiResponse<List<BookingResponse>>> history(
-            @RequestParam UUID studentUserId) {
-        return ResponseEntity.ok(ApiResponse.ok(bookingService.getHistory(studentUserId)));
+    public ResponseEntity<ApiResponse<List<BookingResponse>>> history() {
+        return ResponseEntity.ok(ApiResponse.ok(
+                bookingService.getHistory(SecurityUtils.getCurrentUserId())));
     }
 }
