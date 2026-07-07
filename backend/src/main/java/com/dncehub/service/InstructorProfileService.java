@@ -1,5 +1,6 @@
 package com.dncehub.service;
 
+import com.dncehub.config.CacheConfig;
 import com.dncehub.dto.request.InstructorProfileRequest;
 import com.dncehub.dto.response.InstructorProfileResponse;
 import com.dncehub.entity.InstructorProfile;
@@ -8,13 +9,17 @@ import com.dncehub.exception.AppException;
 import com.dncehub.exception.ErrorCode;
 import com.dncehub.repository.InstructorProfileRepository;
 import com.dncehub.repository.UserRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class InstructorProfileService {
@@ -28,30 +33,34 @@ public class InstructorProfileService {
         this.userRepository = userRepository;
     }
 
+    @Cacheable(value = CacheConfig.CACHE_INSTRUCTORS, key = "'all'")
     @Transactional(readOnly = true)
     public List<InstructorProfileResponse> getAllInstructors() {
         return instructorProfileRepository.findAll()
                 .stream()
                 .map(this::toResponse)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
+    @Cacheable(value = CacheConfig.CACHE_INSTRUCTORS, key = "'city_' + #city.toLowerCase()")
     @Transactional(readOnly = true)
     public List<InstructorProfileResponse> searchByCity(String city) {
         return instructorProfileRepository.findByCityIgnoreCase(city)
                 .stream()
                 .map(this::toResponse)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
+    @Cacheable(value = CacheConfig.CACHE_INSTRUCTORS, key = "'style_' + #style.toLowerCase()")
     @Transactional(readOnly = true)
     public List<InstructorProfileResponse> searchByStyle(String style) {
         return instructorProfileRepository.findByDanceStylesContainingIgnoreCase(style)
                 .stream()
                 .map(this::toResponse)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
+    @Cacheable(value = CacheConfig.CACHE_INSTRUCTORS, key = "'id_' + #id")
     @Transactional(readOnly = true)
     public InstructorProfileResponse getById(Long id) {
         InstructorProfile profile = instructorProfileRepository.findById(id)
@@ -59,6 +68,7 @@ public class InstructorProfileService {
         return toResponse(profile);
     }
 
+    @CacheEvict(value = CacheConfig.CACHE_INSTRUCTORS, allEntries = true)
     @Transactional
     public InstructorProfileResponse create(UUID userId, InstructorProfileRequest request) {
         User user = userRepository.findById(userId)
@@ -80,6 +90,7 @@ public class InstructorProfileService {
         return toResponse(instructorProfileRepository.save(profile));
     }
 
+    @CacheEvict(value = CacheConfig.CACHE_INSTRUCTORS, allEntries = true)
     @Transactional
     public InstructorProfileResponse update(Long id, InstructorProfileRequest request) {
         InstructorProfile profile = instructorProfileRepository.findById(id)
@@ -94,6 +105,7 @@ public class InstructorProfileService {
         return toResponse(instructorProfileRepository.save(profile));
     }
 
+    @CacheEvict(value = CacheConfig.CACHE_INSTRUCTORS, allEntries = true)
     @Transactional
     public void delete(Long id) {
         if (!instructorProfileRepository.existsById(id)) {
@@ -122,6 +134,6 @@ public class InstructorProfileService {
         }
         return Arrays.stream(danceStyles.split(","))
                 .map(String::trim)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 }

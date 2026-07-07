@@ -1,5 +1,6 @@
 package com.dncehub.service;
 
+import com.dncehub.config.CacheConfig;
 import com.dncehub.dto.request.WorkshopRequest;
 import com.dncehub.dto.response.WorkshopResponse;
 import com.dncehub.entity.InstructorProfile;
@@ -13,11 +14,15 @@ import com.dncehub.repository.InstructorProfileRepository;
 import com.dncehub.repository.StudentProfileRepository;
 import com.dncehub.repository.WorkshopRegistrationRepository;
 import com.dncehub.repository.WorkshopRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class WorkshopService {
@@ -37,17 +42,22 @@ public class WorkshopService {
         this.studentProfileRepository = studentProfileRepository;
     }
 
+    @Cacheable(value = CacheConfig.CACHE_WORKSHOPS,
+               key = "'upcoming_' + (#city ?: 'all') + '_' + (#style ?: 'all')")
     @Transactional(readOnly = true)
     public List<WorkshopResponse> listUpcoming(String city, String style) {
         return workshopRepository.findUpcoming(city, style)
-                .stream().map(this::toResponse).toList();
+                .stream().map(this::toResponse)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
+    @Cacheable(value = CacheConfig.CACHE_WORKSHOPS, key = "'id_' + #id")
     @Transactional(readOnly = true)
     public WorkshopResponse getById(Long id) {
         return toResponse(findWorkshop(id));
     }
 
+    @CacheEvict(value = CacheConfig.CACHE_WORKSHOPS, allEntries = true)
     @Transactional
     public WorkshopResponse create(UUID instructorUserId, WorkshopRequest request) {
         InstructorProfile instructor = instructorRepository.findByUserId(instructorUserId)
@@ -64,6 +74,7 @@ public class WorkshopService {
         return toResponse(workshopRepository.save(workshop));
     }
 
+    @CacheEvict(value = CacheConfig.CACHE_WORKSHOPS, allEntries = true)
     @Transactional
     public WorkshopResponse update(Long id, WorkshopRequest request) {
         Workshop workshop = findWorkshop(id);
@@ -79,6 +90,7 @@ public class WorkshopService {
         return toResponse(workshopRepository.save(workshop));
     }
 
+    @CacheEvict(value = CacheConfig.CACHE_WORKSHOPS, allEntries = true)
     @Transactional
     public void cancel(Long id) {
         Workshop workshop = findWorkshop(id);
@@ -95,6 +107,7 @@ public class WorkshopService {
      * acts as an optimistic lock so two concurrent registrations cannot both
      * claim the last seat without one of them failing with a stale-version error.
      */
+    @CacheEvict(value = CacheConfig.CACHE_WORKSHOPS, allEntries = true)
     @Transactional
     public void register(Long workshopId, UUID studentUserId) {
         Workshop workshop = findWorkshop(workshopId);
@@ -122,6 +135,7 @@ public class WorkshopService {
         workshopRepository.save(workshop);
     }
 
+    @CacheEvict(value = CacheConfig.CACHE_WORKSHOPS, allEntries = true)
     @Transactional
     public void cancelRegistration(Long workshopId, UUID studentUserId) {
         StudentProfile student = studentProfileRepository.findByUserId(studentUserId)
@@ -145,7 +159,8 @@ public class WorkshopService {
 
         return workshopRepository
                 .findByInstructorIdOrderByWorkshopDateDesc(instructor.getId())
-                .stream().map(this::toResponse).toList();
+                .stream().map(this::toResponse)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────
