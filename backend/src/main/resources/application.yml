@@ -18,8 +18,11 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 app:
+  cors:
+    allowed-origins: http://localhost:3000
   cache:
     instructors-ttl-seconds: 300   # 5 minutes
     workshops-ttl-seconds: 180     # 3 minutes
