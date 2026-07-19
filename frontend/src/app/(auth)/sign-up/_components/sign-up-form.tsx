@@ -46,9 +46,18 @@ export function SignUpForm() {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...payload } = values;
-      await authService.register(payload);
-      toast.success("Account created! Please sign in.");
-      router.push("/sign-in");
+      const auth = await authService.register(payload);
+      await fetch("/api/auth/set-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accessToken: auth.accessToken,
+          refreshToken: auth.refreshToken,
+        }),
+      });
+      toast.success("Account created! Welcome to DanceHub.");
+      router.push("/dashboard");
+      router.refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Registration failed");
     }

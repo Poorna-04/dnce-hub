@@ -5,6 +5,14 @@ export const ROLES = {
 
 export type Role = (typeof ROLES)[keyof typeof ROLES];
 
+/** The authenticated user, decoded from the access-token JWT payload. */
+export interface AuthUser {
+  userId: string;
+  email: string;
+  fullName: string;
+  role: Role;
+}
+
 /** Matches Spring Boot AuthResponse DTO */
 export interface AuthResponse {
   accessToken: string;

@@ -48,4 +48,5 @@ public class AuthController {
         authService.logout(request.getRefreshToken());
         return ResponseEntity.ok(ApiResponse.ok("Logged out successfully", null));
     }
+
 }

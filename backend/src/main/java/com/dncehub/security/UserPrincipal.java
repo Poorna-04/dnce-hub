@@ -18,13 +18,15 @@ public class UserPrincipal implements UserDetails {
 
     private final UUID id;
     private final String email;
+    private final String fullName;
     private final String password;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    private UserPrincipal(UUID id, String email, String password,
+    private UserPrincipal(UUID id, String email, String fullName, String password,
                           Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.email = email;
+        this.fullName = fullName;
         this.password = password;
         this.authorities = authorities;
     }
@@ -33,10 +35,12 @@ public class UserPrincipal implements UserDetails {
         List<GrantedAuthority> authorities = List.of(
                 new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
         );
-        return new UserPrincipal(user.getId(), user.getEmail(), user.getPassword(), authorities);
+        return new UserPrincipal(user.getId(), user.getEmail(), user.getFullName(),
+                user.getPassword(), authorities);
     }
 
-    public UUID getId() { return id; }
+    public UUID getId()       { return id; }
+    public String getFullName() { return fullName; }
 
     @Override public String getUsername()  { return email; }
     @Override public String getPassword()  { return password; }

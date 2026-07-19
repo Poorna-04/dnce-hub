@@ -31,9 +31,18 @@ export function SignInForm() {
 
   const onSubmit = async (values: LoginFormValues) => {
     try {
-      await authService.login(values);
+      const auth = await authService.login(values);
+      await fetch("/api/auth/set-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accessToken: auth.accessToken,
+          refreshToken: auth.refreshToken,
+        }),
+      });
       toast.success("Welcome back!");
       router.push("/dashboard");
+      router.refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Login failed");
     }
