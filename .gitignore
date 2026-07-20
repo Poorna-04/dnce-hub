@@ -44,11 +44,14 @@ frontend/.env.local
 frontend/.env.development.local
 frontend/.env.test.local
 frontend/.env.production.local
+frontend/next-env.d.ts
+frontend/coverage/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 .eslintcache
+*.tsbuildinfo
 .vercel
 
 # ─── Docker ───────────────────────────────────────────────────────────────────
