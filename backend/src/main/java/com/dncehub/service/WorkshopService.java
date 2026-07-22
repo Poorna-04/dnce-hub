@@ -46,8 +46,15 @@ public class WorkshopService {
                key = "'upcoming_' + (#city ?: 'all') + '_' + (#style ?: 'all')")
     @Transactional(readOnly = true)
     public List<WorkshopResponse> listUpcoming(String city, String style) {
-        return workshopRepository.findUpcoming(city, style)
-                .stream().map(this::toResponse)
+        List<Workshop> workshops;
+        if (city != null && !city.isBlank()) {
+            workshops = workshopRepository.fetchUpcomingByCity(city);
+        } else if (style != null && !style.isBlank()) {
+            workshops = workshopRepository.fetchUpcomingByStyle(style);
+        } else {
+            workshops = workshopRepository.fetchUpcoming();
+        }
+        return workshops.stream().map(this::toResponse)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 

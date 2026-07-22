@@ -12,18 +12,27 @@ import java.util.List;
 @Repository
 public interface WorkshopRepository extends JpaRepository<Workshop, Long> {
 
-    // Public listing — only UPCOMING workshops, optional city/style filter
+    // All upcoming, no filter
+    @Query("SELECT w FROM Workshop w WHERE w.status = 'UPCOMING' ORDER BY w.workshopDate ASC")
+    List<Workshop> fetchUpcoming();
+
+    // Filter by city (case-insensitive)
     @Query("""
             SELECT w FROM Workshop w
             WHERE w.status = 'UPCOMING'
-              AND (:city IS NULL OR LOWER(w.city) = LOWER(:city))
-              AND (:style IS NULL OR LOWER(w.danceStyle) LIKE LOWER(CONCAT('%', :style, '%')))
+              AND LOWER(w.city) = LOWER(:city)
             ORDER BY w.workshopDate ASC
             """)
-    List<Workshop> findUpcoming(
-            @Param("city") String city,
-            @Param("style") String style
-    );
+    List<Workshop> fetchUpcomingByCity(@Param("city") String city);
+
+    // Filter by dance style (case-insensitive, partial match)
+    @Query("""
+            SELECT w FROM Workshop w
+            WHERE w.status = 'UPCOMING'
+              AND LOWER(w.danceStyle) LIKE LOWER(CONCAT('%', :style, '%'))
+            ORDER BY w.workshopDate ASC
+            """)
+    List<Workshop> fetchUpcomingByStyle(@Param("style") String style);
 
     // Instructor's own workshops
     List<Workshop> findByInstructorIdOrderByWorkshopDateDesc(Long instructorId);
