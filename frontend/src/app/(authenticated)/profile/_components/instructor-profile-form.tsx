@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -65,8 +65,10 @@ export function InstructorProfileForm({ existing }: Props) {
         toast.success("Profile created!");
       }
       router.refresh();
-    } catch {
-      toast.error("Something went wrong. Please try again.");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })
+        ?.response?.data?.message ?? "Something went wrong. Please try again.";
+      toast.error(msg);
     }
   }
 
@@ -172,19 +174,24 @@ export function InstructorProfileForm({ existing }: Props) {
         )}
       </div>
 
-      <Button
+      <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-white text-black hover:bg-white/90 font-semibold mt-2"
+        className={cn(
+          "w-full mt-2 py-2.5 rounded-lg bg-white text-black text-sm font-semibold",
+          "hover:bg-white/90 transition-colors",
+          "disabled:opacity-50 disabled:cursor-not-allowed",
+          "flex items-center justify-center gap-2"
+        )}
       >
         {isSubmitting ? (
-          <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving…</>
+          <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>
         ) : isEdit ? (
           "Update Profile"
         ) : (
           "Create Profile"
         )}
-      </Button>
+      </button>
     </form>
   );
 }
