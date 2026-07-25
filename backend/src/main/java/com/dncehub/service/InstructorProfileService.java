@@ -68,6 +68,13 @@ public class InstructorProfileService {
         return toResponse(profile);
     }
 
+    @Transactional(readOnly = true)
+    public InstructorProfileResponse getByUserId(UUID userId) {
+        InstructorProfile profile = instructorProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.INSTRUCTOR_PROFILE_NOT_FOUND));
+        return toResponse(profile);
+    }
+
     @CacheEvict(value = CacheConfig.CACHE_INSTRUCTORS, allEntries = true)
     @Transactional
     public InstructorProfileResponse create(UUID userId, InstructorProfileRequest request) {

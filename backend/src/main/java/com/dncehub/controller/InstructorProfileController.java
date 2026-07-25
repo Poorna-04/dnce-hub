@@ -38,6 +38,12 @@ public class InstructorProfileController {
         return ResponseEntity.ok(ApiResponse.ok(result));
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<InstructorProfileResponse>> getMyProfile() {
+        return ResponseEntity.ok(ApiResponse.ok(
+                instructorProfileService.getByUserId(SecurityUtils.getCurrentUserId())));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<InstructorProfileResponse>> getById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.ok(instructorProfileService.getById(id)));

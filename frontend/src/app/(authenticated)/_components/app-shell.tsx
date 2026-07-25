@@ -8,6 +8,7 @@ import {
   Users,
   CalendarDays,
   BookOpen,
+  UserCircle,
   LogOut,
   Menu,
   X,
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
   { href: "/instructors", label: "Instructors", icon: Users },
   { href: "/workshops", label: "Workshops", icon: BookOpen },
   { href: "/bookings", label: "Bookings", icon: CalendarDays },
+  { href: "/profile", label: "My Profile", icon: UserCircle },
 ];
 
 function RoleBadge({ role }: { role: string }) {
