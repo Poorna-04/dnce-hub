@@ -97,7 +97,13 @@ public class AvailabilitySlotService {
 
     private void checkOverlap(Long instructorId, Long excludeId, AvailabilitySlotRequest req) {
         List<AvailabilitySlot> overlaps = slotRepository.findOverlapping(
-                instructorId, excludeId, req.getStartTime(), req.getEndTime());
+                instructorId,
+                excludeId,
+                req.getStartTime(),
+                req.getEndTime(),
+                req.getSlotType(),
+                req.getDayOfWeek(),
+                req.getSlotDate());
         if (!overlaps.isEmpty()) {
             throw new AppException(ErrorCode.SLOT_OVERLAP);
         }
