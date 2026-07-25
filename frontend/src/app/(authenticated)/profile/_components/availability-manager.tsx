@@ -64,9 +64,30 @@ export function AvailabilityManager({ instructorId, initialSlots }: Props) {
       toast.error("Please fill in start and end times.");
       return;
     }
-    if (form.slotType === "ONE_TIME" && !form.slotDate) {
-      toast.error("Please select a date for the one-time slot.");
-      return;
+    if (form.slotType === "ONE_TIME") {
+      if (!form.slotDate) {
+        toast.error("Please select a date for the one-time slot.");
+        return;
+      }
+
+      const picked = new Date(form.slotDate);
+      const today  = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (isNaN(picked.getTime()) || picked.getFullYear() < today.getFullYear()) {
+        toast.error("Please enter a valid future date.");
+        return;
+      }
+      if (picked < today) {
+        toast.error("Date must be today or in the future.");
+        return;
+      }
+      const maxDate = new Date();
+      maxDate.setFullYear(maxDate.getFullYear() + 2);
+      if (picked > maxDate) {
+        toast.error("Date cannot be more than 2 years in the future.");
+        return;
+      }
     }
     if (form.startTime >= form.endTime) {
       toast.error("End time must be after start time.");
@@ -190,6 +211,7 @@ export function AvailabilityManager({ instructorId, initialSlots }: Props) {
               <Input
                 type="date"
                 min={new Date().toISOString().split("T")[0]}
+                max={(() => { const d = new Date(); d.setFullYear(d.getFullYear() + 2); return d.toISOString().split("T")[0]; })()}
                 value={form.slotDate}
                 onChange={(e) => setField("slotDate", e.target.value)}
                 className="bg-white/5 border-white/10 text-white"
