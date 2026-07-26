@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { decodeToken } from "@/lib/auth/decode-token";
 import { serverFetch } from "@/lib/api/server";
 import type { Booking } from "@/types/booking";
+import type { Workshop } from "@/types/workshop";
 import type { Role } from "@/types/auth";
 import { ROLES } from "@/types/auth";
 import { BookingsTabView } from "./_components";
@@ -16,17 +17,22 @@ export default async function BookingsPage() {
 
   let upcoming: Booking[] = [];
   let history: Booking[] = [];
+  let registeredWorkshops: Workshop[] = [];
 
   try {
     upcoming = await serverFetch<Booking[]>("/bookings/my/upcoming", { requireAuth: true });
-  } catch {
-    // empty state — show zero bookings
-  }
+  } catch { /* empty */ }
 
   try {
     history = await serverFetch<Booking[]>("/bookings/my/history", { requireAuth: true });
-  } catch {
-    // empty state
+  } catch { /* empty */ }
+
+  if (role === ROLES.STUDENT) {
+    try {
+      registeredWorkshops = await serverFetch<Workshop[]>("/workshops/my-registrations", {
+        requireAuth: true,
+      });
+    } catch { /* empty */ }
   }
 
   return (
@@ -35,12 +41,17 @@ export default async function BookingsPage() {
         <h1 className="text-2xl font-bold text-white">My Bookings</h1>
         <p className="text-white/50 text-sm mt-1">
           {role === ROLES.STUDENT
-            ? "Track your lessons — upcoming sessions and past history."
+            ? "Track your lessons and workshop registrations."
             : "Manage bookings from your students."}
         </p>
       </div>
 
-      <BookingsTabView upcoming={upcoming} history={history} role={role} />
+      <BookingsTabView
+        upcoming={upcoming}
+        history={history}
+        role={role}
+        registeredWorkshops={registeredWorkshops}
+      />
     </div>
   );
 }

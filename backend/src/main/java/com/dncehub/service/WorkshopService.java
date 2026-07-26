@@ -160,6 +160,14 @@ public class WorkshopService {
     }
 
     @Transactional(readOnly = true)
+    public List<WorkshopResponse> getMyRegistrations(UUID studentUserId) {
+        return registrationRepository.findByStudent_User_Id(studentUserId)
+                .stream()
+                .map(reg -> toResponse(reg.getWorkshop()))
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    @Transactional(readOnly = true)
     public List<WorkshopResponse> getMyWorkshops(UUID instructorUserId) {
         InstructorProfile instructor = instructorRepository.findByUserId(instructorUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.INSTRUCTOR_PROFILE_NOT_FOUND));

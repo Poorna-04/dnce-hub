@@ -1,7 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Clock, MapPin, Monitor, Users } from "lucide-react";
+import { cookies } from "next/headers";
 import { serverFetch } from "@/lib/api/server";
+import { decodeToken } from "@/lib/auth/decode-token";
+import { ROLES } from "@/types/auth";
 import type { Workshop } from "@/types/workshop";
 import { STATUS_LABEL, STATUS_STYLE } from "@/types/workshop";
 import { RegisterButton } from "./_components";
@@ -30,6 +33,23 @@ export default async function WorkshopDetailPage({ params }: PageProps) {
     workshop = await serverFetch<Workshop>(`/workshops/${id}`);
   } catch {
     notFound();
+  }
+
+  // Check if the current student is already registered
+  const cookieStore = await cookies();
+  const token = cookieStore.get("dnce_access_token")?.value;
+  const user = token ? decodeToken(token) : null;
+  let isRegistered = false;
+
+  if (user?.role === ROLES.STUDENT) {
+    try {
+      const myRegs = await serverFetch<Workshop[]>("/workshops/my-registrations", {
+        requireAuth: true,
+      });
+      isRegistered = myRegs.some((w) => w.id === workshop.id);
+    } catch {
+      // no profile yet or other error — default to not registered
+    }
   }
 
   const seatsPercent = Math.round(
@@ -136,7 +156,11 @@ export default async function WorkshopDetailPage({ params }: PageProps) {
         </div>
         <div className="flex-1">
           {canRegister ? (
-            <RegisterButton workshopId={workshop.id} seatsLeft={workshop.seatsLeft} />
+            <RegisterButton
+              workshopId={workshop.id}
+              seatsLeft={workshop.seatsLeft}
+              initialRegistered={isRegistered}
+            />
           ) : (
             <div className={`w-full py-2.5 rounded-lg text-center text-sm font-medium border ${STATUS_STYLE[workshop.status]} border-transparent`}>
               {STATUS_LABEL[workshop.status]}

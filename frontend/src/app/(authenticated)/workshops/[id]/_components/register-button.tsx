@@ -8,11 +8,11 @@ import { apiClient } from "@/lib/api/client";
 interface RegisterButtonProps {
   workshopId: number;
   seatsLeft: number;
+  initialRegistered?: boolean;
 }
 
-export function RegisterButton({ workshopId, seatsLeft }: RegisterButtonProps) {
-  // Start unregistered — a real app would check the student's registrations on load.
-  const [registered, setRegistered] = useState(false);
+export function RegisterButton({ workshopId, seatsLeft, initialRegistered = false }: RegisterButtonProps) {
+  const [registered, setRegistered] = useState(initialRegistered);
   const [loading, setLoading] = useState(false);
 
   const full = seatsLeft === 0 && !registered;

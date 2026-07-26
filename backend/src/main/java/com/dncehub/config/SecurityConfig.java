@@ -39,8 +39,10 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/auth/**").permitAll()
-                // /me requires auth — must be listed before the wildcard permitAll
+                // auth-required GET routes — must be before the wildcard permitAll
                 .requestMatchers(HttpMethod.GET, "/api/v1/instructors/me").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/v1/workshops/my").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/v1/workshops/my-registrations").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/v1/instructors/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/workshops/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/health").permitAll()

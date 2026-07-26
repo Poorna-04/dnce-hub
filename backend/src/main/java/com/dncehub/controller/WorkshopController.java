@@ -35,6 +35,12 @@ public class WorkshopController {
                 workshopService.getMyWorkshops(SecurityUtils.getCurrentUserId())));
     }
 
+    @GetMapping("/my-registrations")
+    public ResponseEntity<ApiResponse<List<WorkshopResponse>>> myRegistrations() {
+        return ResponseEntity.ok(ApiResponse.ok(
+                workshopService.getMyRegistrations(SecurityUtils.getCurrentUserId())));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<WorkshopResponse>> getById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.ok(workshopService.getById(id)));
