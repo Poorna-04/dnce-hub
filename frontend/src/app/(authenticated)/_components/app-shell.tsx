@@ -9,20 +9,29 @@ import {
   CalendarDays,
   BookOpen,
   UserCircle,
+  GraduationCap,
   LogOut,
   Menu,
   X,
   Music2,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { ROLES } from "@/types/auth";
+import { ROLES, type Role } from "@/types/auth";
 
-const NAV_ITEMS = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/instructors", label: "Instructors", icon: Users },
-  { href: "/workshops", label: "Workshops", icon: BookOpen },
-  { href: "/bookings", label: "Bookings", icon: CalendarDays },
-  { href: "/profile", label: "My Profile", icon: UserCircle },
+interface NavItem {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+  roles?: Role[];   // undefined = visible to all
+}
+
+const NAV_ITEMS: NavItem[] = [
+  { href: "/dashboard",    label: "Dashboard",    icon: LayoutDashboard },
+  { href: "/instructors",  label: "Instructors",  icon: Users },
+  { href: "/workshops",    label: "Workshops",    icon: BookOpen },
+  { href: "/workshops/my", label: "My Workshops", icon: GraduationCap, roles: [ROLES.INSTRUCTOR] },
+  { href: "/bookings",     label: "Bookings",     icon: CalendarDays },
+  { href: "/profile",      label: "My Profile",   icon: UserCircle },
 ];
 
 function RoleBadge({ role }: { role: string }) {
@@ -64,24 +73,26 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-2 space-y-0.5">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(href + "/");
-          return (
-            <Link
-              key={href}
-              href={href}
-              onClick={onClose}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                active
-                  ? "bg-white/10 text-white"
-                  : "text-white/40 hover:text-white hover:bg-white/5"
-              }`}
-            >
-              <Icon className="w-4 h-4 shrink-0" />
-              {label}
-            </Link>
-          );
-        })}
+        {NAV_ITEMS
+          .filter(({ roles }) => !roles || (user?.role && roles.includes(user.role)))
+          .map(({ href, label, icon: Icon }) => {
+            const active = pathname === href || pathname.startsWith(href + "/");
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={onClose}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  active
+                    ? "bg-white/10 text-white"
+                    : "text-white/40 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <Icon className="w-4 h-4 shrink-0" />
+                {label}
+              </Link>
+            );
+          })}
       </nav>
 
       {/* User section */}

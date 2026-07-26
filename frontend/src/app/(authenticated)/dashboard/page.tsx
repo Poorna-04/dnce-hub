@@ -5,6 +5,7 @@ import { serverFetch } from "@/lib/api/server";
 import { ROLES } from "@/types/auth";
 import type { Booking } from "@/types/booking";
 import type { InstructorProfile } from "@/types/instructor";
+import type { Workshop } from "@/types/workshop";
 import {
   CalendarDays,
   Users,
@@ -63,13 +64,18 @@ export default async function DashboardPage() {
   // ── Fetch real stats ──────────────────────────────────────────────────────
   let upcomingCount = 0;
   let savedCount    = 0;
+  let workshops: Workshop[] = [];
 
   try {
     const bookings = await serverFetch<Booking[]>("/bookings/my/upcoming", { requireAuth: true });
     upcomingCount = bookings.length;
   } catch { /* ignore */ }
 
-  if (!isInstructor) {
+  if (isInstructor) {
+    try {
+      workshops = await serverFetch<Workshop[]>("/workshops/my", { requireAuth: true });
+    } catch { /* ignore */ }
+  } else {
     try {
       const saved = await serverFetch<InstructorProfile[]>("/students/saved-instructors", { requireAuth: true });
       savedCount = saved.length;
@@ -96,7 +102,7 @@ export default async function DashboardPage() {
         {isInstructor ? (
           <>
             <StatCard label="Upcoming Bookings" value={upcomingCount} icon={CalendarDays} href="/bookings"  color="violet" />
-            <StatCard label="My Workshops"       value="—"            icon={BookOpen}     href="/workshops/my" color="sky" />
+            <StatCard label="My Workshops"       value={workshops.length} icon={BookOpen} href="/workshops/my" color="sky" />
             <StatCard label="Profile"            value="Active"       icon={Users}        href="/profile"   color="emerald" />
             <StatCard label="Slots"              value="—"            icon={TrendingUp} />
           </>
