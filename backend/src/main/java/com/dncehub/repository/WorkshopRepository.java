@@ -36,4 +36,11 @@ public interface WorkshopRepository extends JpaRepository<Workshop, Long> {
 
     // Instructor's own workshops
     List<Workshop> findByInstructorIdOrderByWorkshopDateDesc(Long instructorId);
+
+    /**
+     * All workshops still in an active/in-progress status.
+     * Loaded in bulk by syncStaleStatuses() which then applies full date+time logic in Java.
+     */
+    @Query("SELECT w FROM Workshop w WHERE w.status IN :statuses")
+    List<Workshop> findAllByStatusIn(@Param("statuses") List<WorkshopStatus> statuses);
 }

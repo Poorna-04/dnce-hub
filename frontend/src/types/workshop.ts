@@ -23,6 +23,12 @@ export interface Workshop {
   createdAt: string;
 }
 
+/** Workshop + registration-specific fields returned from /workshops/my-registrations */
+export interface RegisteredWorkshop extends Omit<Workshop, "posterUrl" | "createdAt"> {
+  paymentStatus: "PENDING" | "PAID" | "REFUNDED";
+  registeredAt: string;
+}
+
 export const STATUS_LABEL: Record<WorkshopStatus, string> = {
   UPCOMING: "Upcoming",
   ONGOING: "Live now",

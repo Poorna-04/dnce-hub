@@ -11,6 +11,7 @@ public class BookingResponse {
     private Long id;
     private Long studentId;
     private String studentName;
+    private String studentEmail;
     private Long instructorId;
     private String instructorName;
     private Long slotId;
@@ -25,6 +26,7 @@ public class BookingResponse {
     public Long getId() { return id; }
     public Long getStudentId() { return studentId; }
     public String getStudentName() { return studentName; }
+    public String getStudentEmail() { return studentEmail; }
     public Long getInstructorId() { return instructorId; }
     public String getInstructorName() { return instructorName; }
     public Long getSlotId() { return slotId; }
@@ -42,6 +44,7 @@ public class BookingResponse {
         private Long id;
         private Long studentId;
         private String studentName;
+        private String studentEmail;
         private Long instructorId;
         private String instructorName;
         private Long slotId;
@@ -56,6 +59,7 @@ public class BookingResponse {
         public Builder id(Long v) { this.id = v; return this; }
         public Builder studentId(Long v) { this.studentId = v; return this; }
         public Builder studentName(String v) { this.studentName = v; return this; }
+        public Builder studentEmail(String v) { this.studentEmail = v; return this; }
         public Builder instructorId(Long v) { this.instructorId = v; return this; }
         public Builder instructorName(String v) { this.instructorName = v; return this; }
         public Builder slotId(Long v) { this.slotId = v; return this; }
@@ -72,6 +76,7 @@ public class BookingResponse {
             r.id = this.id;
             r.studentId = this.studentId;
             r.studentName = this.studentName;
+            r.studentEmail = this.studentEmail;
             r.instructorId = this.instructorId;
             r.instructorName = this.instructorName;
             r.slotId = this.slotId;

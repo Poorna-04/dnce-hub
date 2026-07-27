@@ -41,8 +41,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 // auth-required GET routes — must be before the wildcard permitAll
                 .requestMatchers(HttpMethod.GET, "/api/v1/instructors/me").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/v1/workshops/my").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/v1/workshops/my-registrations").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/workshops/my").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/workshops/my-registrations").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/workshops/*/pay-registration").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/v1/instructors/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/workshops/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/health").permitAll()

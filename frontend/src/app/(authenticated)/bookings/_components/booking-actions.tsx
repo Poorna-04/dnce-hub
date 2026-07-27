@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2, CreditCard } from "lucide-react";
 import { apiClient } from "@/lib/api/client";
 import type { Booking } from "@/types/booking";
 import type { Role } from "@/types/auth";
@@ -15,7 +14,7 @@ interface Props {
   role: Role;
 }
 
-type Action = "confirm" | "cancel" | "complete";
+type Action = "pay" | "complete" | "cancel";
 
 export function BookingActions({ booking, role }: Props) {
   const router = useRouter();
@@ -25,7 +24,12 @@ export function BookingActions({ booking, role }: Props) {
     setLoading(action);
     try {
       await apiClient.patch(`/bookings/${booking.id}/${action}`);
-      toast.success(`Booking ${action}ed!`);
+      const messages: Record<Action, string> = {
+        pay:      "Payment successful! Booking confirmed.",
+        complete: "Session marked as complete!",
+        cancel:   "Booking cancelled.",
+      };
+      toast.success(messages[action]);
       router.refresh();
     } catch {
       toast.error("Something went wrong. Please try again.");
@@ -34,65 +38,46 @@ export function BookingActions({ booking, role }: Props) {
     }
   }
 
-  const isStudent    = role === ROLES.STUDENT;
-  const isInstructor = role === ROLES.INSTRUCTOR;
-  const isPending    = booking.status === "PENDING";
-  const isConfirmed  = booking.status === "CONFIRMED";
+  const isStudent   = role === ROLES.STUDENT;
+  const isPending   = booking.status === "PENDING";
+  const isConfirmed = booking.status === "CONFIRMED";
 
-  // What actions are available?
-  const showConfirm  = isInstructor && isPending;
-  const showComplete = isInstructor && isConfirmed;
-  const showCancel   = (isStudent && (isPending || isConfirmed)) ||
-                       (isInstructor && (isPending || isConfirmed));
+  // Student: Pay Now on PENDING
+  const showPay    = isStudent && isPending;
+  // Both roles: Cancel on PENDING or CONFIRMED
+  const showCancel = isPending || isConfirmed;
+  // Sessions auto-complete once the date passes — no manual "Mark Complete" needed
 
-  if (!showConfirm && !showComplete && !showCancel) return null;
+  if (!showPay && !showCancel) return null;
 
   return (
     <div className="flex gap-2 flex-wrap">
-      {showConfirm && (
-        <Button
-          size="sm"
-          onClick={() => handleAction("confirm")}
+      {showPay && (
+        <button
+          onClick={() => handleAction("pay")}
           disabled={loading !== null}
-          className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-7 px-3"
+          className="flex items-center gap-1.5 px-3 h-7 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors disabled:opacity-50"
         >
-          {loading === "confirm" ? (
+          {loading === "pay" ? (
             <Loader2 className="w-3 h-3 animate-spin" />
           ) : (
-            "Confirm"
+            <><CreditCard className="w-3 h-3" /> Pay Now</>
           )}
-        </Button>
-      )}
-
-      {showComplete && (
-        <Button
-          size="sm"
-          onClick={() => handleAction("complete")}
-          disabled={loading !== null}
-          className="bg-sky-600 hover:bg-sky-500 text-white text-xs h-7 px-3"
-        >
-          {loading === "complete" ? (
-            <Loader2 className="w-3 h-3 animate-spin" />
-          ) : (
-            "Mark Complete"
-          )}
-        </Button>
+        </button>
       )}
 
       {showCancel && (
-        <Button
-          size="sm"
-          variant="outline"
+        <button
           onClick={() => handleAction("cancel")}
           disabled={loading !== null}
-          className="border-red-500/40 text-red-400 hover:bg-red-500/10 text-xs h-7 px-3"
+          className="px-3 h-7 rounded-lg border border-red-500/30 text-red-400/80 hover:bg-red-500/10 hover:text-red-400 text-xs font-medium transition-colors disabled:opacity-50"
         >
           {loading === "cancel" ? (
             <Loader2 className="w-3 h-3 animate-spin" />
           ) : (
             "Cancel"
           )}
-        </Button>
+        </button>
       )}
     </div>
   );

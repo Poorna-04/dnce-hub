@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { decodeToken } from "@/lib/auth/decode-token";
 import { serverFetch } from "@/lib/api/server";
 import type { Booking } from "@/types/booking";
-import type { Workshop } from "@/types/workshop";
+import type { RegisteredWorkshop } from "@/types/workshop";
 import type { Role } from "@/types/auth";
 import { ROLES } from "@/types/auth";
 import { BookingsTabView } from "./_components";
@@ -17,7 +17,7 @@ export default async function BookingsPage() {
 
   let upcoming: Booking[] = [];
   let history: Booking[] = [];
-  let registeredWorkshops: Workshop[] = [];
+  let registeredWorkshops: RegisteredWorkshop[] = [];
 
   try {
     upcoming = await serverFetch<Booking[]>("/bookings/my/upcoming", { requireAuth: true });
@@ -29,7 +29,7 @@ export default async function BookingsPage() {
 
   if (role === ROLES.STUDENT) {
     try {
-      registeredWorkshops = await serverFetch<Workshop[]>("/workshops/my-registrations", {
+      registeredWorkshops = await serverFetch<RegisteredWorkshop[]>("/workshops/my-registrations", {
         requireAuth: true,
       });
     } catch { /* empty */ }

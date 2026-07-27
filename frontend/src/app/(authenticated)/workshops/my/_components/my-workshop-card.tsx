@@ -4,11 +4,19 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, Calendar, Clock, MapPin, Monitor, Users, ExternalLink, AlertTriangle } from "lucide-react";
+import { Loader2, Calendar, Clock, MapPin, Monitor, Users, ExternalLink, AlertTriangle, Mail } from "lucide-react";
 import { Dialog } from "@/components/ui/dialog";
 import { apiClient } from "@/lib/api/client";
 import type { Workshop } from "@/types/workshop";
 import { STATUS_LABEL, STATUS_STYLE } from "@/types/workshop";
+
+interface Registrant {
+  studentProfileId: number;
+  fullName: string;
+  email: string;
+  paymentStatus: string;
+  registeredAt: string;
+}
 
 interface Props {
   workshop: Workshop;
@@ -30,8 +38,26 @@ export function MyWorkshopCard({ workshop }: Props) {
   const router = useRouter();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [registrantsOpen, setRegistrantsOpen] = useState(false);
+  const [registrants, setRegistrants] = useState<Registrant[] | null>(null);
+  const [loadingRegistrants, setLoadingRegistrants] = useState(false);
 
   const canCancel = workshop.status === "UPCOMING";
+
+  async function openRegistrants() {
+    setRegistrantsOpen(true);
+    if (registrants !== null) return; // already loaded
+    setLoadingRegistrants(true);
+    try {
+      const res = await apiClient.get<{ data: Registrant[] }>(`/workshops/${workshop.id}/registrants`);
+      setRegistrants(res.data.data);
+    } catch {
+      toast.error("Failed to load registrants.");
+      setRegistrants([]);
+    } finally {
+      setLoadingRegistrants(false);
+    }
+  }
 
   const seatsPercent = workshop.totalSeats > 0
     ? Math.round((workshop.registeredSeats / workshop.totalSeats) * 100)
@@ -104,7 +130,14 @@ export function MyWorkshopCard({ workshop }: Props) {
           <span className="text-white font-semibold text-sm">
             {workshop.price === 0 ? "Free" : `₹${workshop.price}`}
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={openRegistrants}
+              className="flex items-center gap-1 text-xs text-violet-400/70 hover:text-violet-300 transition-colors"
+            >
+              <Users className="w-3 h-3" />
+              Students
+            </button>
             <Link
               href={`/workshops/${workshop.id}`}
               className="flex items-center gap-1 text-xs text-white/40 hover:text-white/70 transition-colors"
@@ -123,6 +156,62 @@ export function MyWorkshopCard({ workshop }: Props) {
           </div>
         </div>
       </div>
+
+      {/* Registrants dialog */}
+      <Dialog
+        open={registrantsOpen}
+        onClose={() => setRegistrantsOpen(false)}
+        title={`Registered Students — ${workshop.title}`}
+        className="max-w-md"
+      >
+        {loadingRegistrants ? (
+          <div className="flex items-center justify-center py-10">
+            <Loader2 className="w-5 h-5 animate-spin text-white/30" />
+          </div>
+        ) : registrants && registrants.length === 0 ? (
+          <div className="text-center py-10">
+            <Users className="w-8 h-8 text-white/10 mx-auto mb-3" />
+            <p className="text-white/30 text-sm">No students registered yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+            {(registrants ?? []).map((r) => (
+              <div
+                key={r.studentProfileId}
+                className="flex items-center gap-3 rounded-lg bg-white/[0.03] border border-white/5 px-4 py-3"
+              >
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                  {r.fullName[0]?.toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-white text-sm font-medium truncate">{r.fullName}</p>
+                  <p className="text-white/40 text-xs flex items-center gap-1 truncate">
+                    <Mail className="w-3 h-3 shrink-0" />
+                    {r.email}
+                  </p>
+                </div>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${
+                  r.paymentStatus === "PAID"
+                    ? "bg-emerald-500/15 text-emerald-300"
+                    : "bg-yellow-500/15 text-yellow-300"
+                }`}>
+                  {r.paymentStatus}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-white/30">
+          <span>{workshop.registeredSeats} / {workshop.totalSeats} seats filled</span>
+          <button
+            onClick={() => setRegistrantsOpen(false)}
+            className="text-white/50 hover:text-white transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </Dialog>
 
       {/* Custom confirm dialog */}
       <Dialog

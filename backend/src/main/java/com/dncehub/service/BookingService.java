@@ -8,13 +8,16 @@ import com.dncehub.entity.StudentProfile;
 import com.dncehub.entity.enums.BookingStatus;
 import com.dncehub.exception.AppException;
 import com.dncehub.exception.ErrorCode;
+import com.dncehub.entity.InstructorProfile;
 import com.dncehub.repository.AvailabilitySlotRepository;
 import com.dncehub.repository.BookingRepository;
+import com.dncehub.repository.InstructorProfileRepository;
 import com.dncehub.repository.StudentProfileRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,13 +26,16 @@ public class BookingService {
 
     private final BookingRepository bookingRepository;
     private final StudentProfileRepository studentProfileRepository;
+    private final InstructorProfileRepository instructorProfileRepository;
     private final AvailabilitySlotRepository slotRepository;
 
     public BookingService(BookingRepository bookingRepository,
                           StudentProfileRepository studentProfileRepository,
+                          InstructorProfileRepository instructorProfileRepository,
                           AvailabilitySlotRepository slotRepository) {
         this.bookingRepository = bookingRepository;
         this.studentProfileRepository = studentProfileRepository;
+        this.instructorProfileRepository = instructorProfileRepository;
         this.slotRepository = slotRepository;
     }
 
@@ -83,6 +89,15 @@ public class BookingService {
         return toResponse(bookingRepository.save(booking));
     }
 
+    /** Simulates student payment — moves booking from PENDING → CONFIRMED */
+    @Transactional
+    public BookingResponse pay(Long id) {
+        Booking booking = findBooking(id);
+        assertStatus(booking, BookingStatus.PENDING);
+        booking.setStatus(BookingStatus.CONFIRMED);
+        return toResponse(bookingRepository.save(booking));
+    }
+
     @Transactional
     public BookingResponse cancel(Long id, String cancelledBy) {
         Booking booking = findBooking(id);
@@ -103,28 +118,68 @@ public class BookingService {
         return toResponse(bookingRepository.save(booking));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<BookingResponse> getUpcoming(UUID studentUserId) {
+        syncStaleBookings();
         StudentProfile student = studentProfileRepository.findByUserId(studentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
 
         return bookingRepository.findUpcomingByStudent(
-                student.getId(),
-                LocalDate.now(),
+                student.getId(), LocalDate.now(),
                 List.of(BookingStatus.PENDING, BookingStatus.CONFIRMED)
         ).stream().map(this::toResponse).toList();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<BookingResponse> getHistory(UUID studentUserId) {
+        syncStaleBookings();
         StudentProfile student = studentProfileRepository.findByUserId(studentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
 
         return bookingRepository.findHistoryByStudent(
-                student.getId(),
-                LocalDate.now(),
+                student.getId(), LocalDate.now(),
                 List.of(BookingStatus.CANCELLED, BookingStatus.COMPLETED)
         ).stream().map(this::toResponse).toList();
+    }
+
+    @Transactional
+    public List<BookingResponse> getUpcomingForInstructor(UUID instructorUserId) {
+        syncStaleBookings();
+        InstructorProfile instructor = instructorProfileRepository.findByUserId(instructorUserId)
+                .orElseThrow(() -> new AppException(ErrorCode.INSTRUCTOR_PROFILE_NOT_FOUND));
+
+        return bookingRepository.findUpcomingByInstructor(
+                instructor.getId(), LocalDate.now(),
+                List.of(BookingStatus.PENDING, BookingStatus.CONFIRMED)
+        ).stream().map(this::toResponse).toList();
+    }
+
+    @Transactional
+    public List<BookingResponse> getHistoryForInstructor(UUID instructorUserId) {
+        syncStaleBookings();
+        InstructorProfile instructor = instructorProfileRepository.findByUserId(instructorUserId)
+                .orElseThrow(() -> new AppException(ErrorCode.INSTRUCTOR_PROFILE_NOT_FOUND));
+
+        return bookingRepository.findHistoryByInstructor(
+                instructor.getId(), LocalDate.now(),
+                List.of(BookingStatus.CANCELLED, BookingStatus.COMPLETED)
+        ).stream().map(this::toResponse).toList();
+    }
+
+    /**
+     * Auto-marks past bookings (bookingDate < today, still PENDING or CONFIRMED)
+     * as COMPLETED. Called before every list query so status is always accurate.
+     */
+    @Transactional
+    public void syncStaleBookings() {
+        List<Booking> stale = bookingRepository.findPastActive(
+                LocalDate.now(),
+                List.of(BookingStatus.PENDING, BookingStatus.CONFIRMED)
+        );
+        if (!stale.isEmpty()) {
+            stale.forEach(b -> b.setStatus(BookingStatus.COMPLETED));
+            bookingRepository.saveAll(stale);
+        }
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────
@@ -145,6 +200,7 @@ public class BookingService {
                 .id(b.getId())
                 .studentId(b.getStudent().getId())
                 .studentName(b.getStudent().getUser().getFullName())
+                .studentEmail(b.getStudent().getUser().getEmail())
                 .instructorId(b.getInstructor().getId())
                 .instructorName(b.getInstructor().getUser().getFullName())
                 .slotId(b.getSlot().getId())

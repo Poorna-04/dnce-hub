@@ -25,13 +25,21 @@ interface NavItem {
   roles?: Role[];   // undefined = visible to all
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { href: "/dashboard",    label: "Dashboard",    icon: LayoutDashboard },
-  { href: "/instructors",  label: "Instructors",  icon: Users },
-  { href: "/workshops",    label: "Workshops",    icon: BookOpen },
-  { href: "/workshops/my", label: "My Workshops", icon: GraduationCap, roles: [ROLES.INSTRUCTOR] },
-  { href: "/bookings",     label: "Bookings",     icon: CalendarDays },
-  { href: "/profile",      label: "My Profile",   icon: UserCircle },
+// Separate nav configs per role for clarity
+const STUDENT_NAV: NavItem[] = [
+  { href: "/dashboard",    label: "Dashboard",      icon: LayoutDashboard },
+  { href: "/instructors",  label: "Instructors",    icon: Users },
+  { href: "/workshops",    label: "Workshops",      icon: BookOpen },
+  { href: "/bookings",     label: "Bookings",       icon: CalendarDays },
+  { href: "/profile",      label: "My Profile",     icon: UserCircle },
+];
+
+const INSTRUCTOR_NAV: NavItem[] = [
+  { href: "/dashboard",    label: "Dashboard",      icon: LayoutDashboard },
+  { href: "/instructors",  label: "Instructors",    icon: Users },
+  { href: "/workshops/my", label: "My Workshops",   icon: GraduationCap },
+  { href: "/bookings",     label: "Bookings",       icon: CalendarDays },
+  { href: "/profile",      label: "My Profile",     icon: UserCircle },
 ];
 
 function RoleBadge({ role }: { role: string }) {
@@ -73,8 +81,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-2 space-y-0.5">
-        {NAV_ITEMS
-          .filter(({ roles }) => !roles || (user?.role && roles.includes(user.role)))
+        {(user?.role === ROLES.INSTRUCTOR ? INSTRUCTOR_NAV : STUDENT_NAV)
           .map(({ href, label, icon: Icon }) => {
             const active = pathname === href || pathname.startsWith(href + "/");
             return (

@@ -8,6 +8,7 @@ export interface Booking {
   id: number;
   studentId: number;
   studentName: string;
+  studentEmail?: string;
   instructorId: number;
   instructorName: string;
   slotId: number;

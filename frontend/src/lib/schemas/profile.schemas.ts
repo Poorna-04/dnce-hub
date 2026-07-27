@@ -10,7 +10,7 @@ export const studentProfileSchema = z.object({
 
 export const instructorProfileSchema = z.object({
   experienceYears: z
-    .number({ invalid_type_error: "Enter a number" })
+    .number({ error: "Enter a number" })
     .int()
     .min(0, "Cannot be negative")
     .max(60, "Must be 60 or less"),
@@ -19,7 +19,7 @@ export const instructorProfileSchema = z.object({
     .min(1, "Please enter at least one dance style")
     .max(200, "Too long"),
   hourlyRate: z
-    .number({ invalid_type_error: "Enter a number" })
+    .number({ error: "Enter a number" })
     .positive("Must be greater than 0"),
   city: z.string().min(1, "City is required").max(100),
   teachingMode: z.enum(["IN_PERSON", "ONLINE", "BOTH"], {

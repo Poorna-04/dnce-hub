@@ -52,11 +52,14 @@ export default async function WorkshopDetailPage({ params }: PageProps) {
     }
   }
 
+  const isInstructor = user?.role === ROLES.INSTRUCTOR;
+
   const seatsPercent = Math.round(
     ((workshop.totalSeats - workshop.seatsLeft) / workshop.totalSeats) * 100
   );
   const lowSeats = workshop.seatsLeft > 0 && workshop.seatsLeft <= 5;
-  const canRegister = workshop.status === "UPCOMING" || workshop.status === "ONGOING";
+  // Instructors view workshop details but cannot register
+  const canRegister = !isInstructor && (workshop.status === "UPCOMING" || workshop.status === "ONGOING");
 
   return (
     <div className="p-6 md:p-8 max-w-3xl">

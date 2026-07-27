@@ -17,10 +17,10 @@ export const workshopSchema = z
       .optional()
       .or(z.literal("")),
     price: z
-      .number({ invalid_type_error: "Enter a number" })
+      .number({ error: "Enter a number" })
       .min(0, "Price must be ≥ 0"),
     totalSeats: z
-      .number({ invalid_type_error: "Enter a number" })
+      .number({ error: "Enter a number" })
       .int()
       .min(1, "At least 1 seat required"),
   })

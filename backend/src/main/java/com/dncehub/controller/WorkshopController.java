@@ -2,6 +2,8 @@ package com.dncehub.controller;
 
 import com.dncehub.dto.request.WorkshopRequest;
 import com.dncehub.dto.response.ApiResponse;
+import com.dncehub.dto.response.RegisteredWorkshopResponse;
+import com.dncehub.dto.response.WorkshopRegistrantResponse;
 import com.dncehub.dto.response.WorkshopResponse;
 import com.dncehub.security.SecurityUtils;
 import com.dncehub.service.WorkshopService;
@@ -35,10 +37,22 @@ public class WorkshopController {
                 workshopService.getMyWorkshops(SecurityUtils.getCurrentUserId())));
     }
 
+    @GetMapping("/{id}/registrants")
+    public ResponseEntity<ApiResponse<List<WorkshopRegistrantResponse>>> getRegistrants(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.ok(workshopService.getRegistrants(id)));
+    }
+
     @GetMapping("/my-registrations")
-    public ResponseEntity<ApiResponse<List<WorkshopResponse>>> myRegistrations() {
+    public ResponseEntity<ApiResponse<List<RegisteredWorkshopResponse>>> myRegistrations() {
         return ResponseEntity.ok(ApiResponse.ok(
                 workshopService.getMyRegistrations(SecurityUtils.getCurrentUserId())));
+    }
+
+    @PatchMapping("/{id}/pay-registration")
+    public ResponseEntity<ApiResponse<Void>> payRegistration(@PathVariable Long id) {
+        workshopService.payWorkshopRegistration(id, SecurityUtils.getCurrentUserId());
+        return ResponseEntity.ok(ApiResponse.ok("Payment successful", null));
     }
 
     @GetMapping("/{id}")

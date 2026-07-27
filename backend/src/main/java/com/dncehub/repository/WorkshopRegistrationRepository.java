@@ -17,4 +17,7 @@ public interface WorkshopRegistrationRepository extends JpaRepository<WorkshopRe
 
     // All registrations for a given student (by their user UUID)
     List<WorkshopRegistration> findByStudent_User_Id(UUID userId);
+
+    // All registrations for a given workshop
+    List<WorkshopRegistration> findByWorkshopId(Long workshopId);
 }

@@ -2,12 +2,16 @@ package com.dncehub.service;
 
 import com.dncehub.config.CacheConfig;
 import com.dncehub.dto.request.WorkshopRequest;
+import com.dncehub.dto.response.RegisteredWorkshopResponse;
+import com.dncehub.dto.response.WorkshopRegistrantResponse;
 import com.dncehub.dto.response.WorkshopResponse;
 import com.dncehub.entity.InstructorProfile;
 import com.dncehub.entity.StudentProfile;
 import com.dncehub.entity.Workshop;
 import com.dncehub.entity.WorkshopRegistration;
 import com.dncehub.entity.enums.WorkshopStatus;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import com.dncehub.exception.AppException;
 import com.dncehub.exception.ErrorCode;
 import com.dncehub.repository.InstructorProfileRepository;
@@ -159,16 +163,35 @@ public class WorkshopService {
         workshopRepository.save(workshop);
     }
 
-    @Transactional(readOnly = true)
-    public List<WorkshopResponse> getMyRegistrations(UUID studentUserId) {
-        return registrationRepository.findByStudent_User_Id(studentUserId)
-                .stream()
-                .map(reg -> toResponse(reg.getWorkshop()))
-                .collect(Collectors.toCollection(ArrayList::new));
+    @CacheEvict(value = CacheConfig.CACHE_WORKSHOPS, allEntries = true)
+    @Transactional
+    public void payWorkshopRegistration(Long workshopId, UUID studentUserId) {
+        StudentProfile student = studentProfileRepository.findByUserId(studentUserId)
+                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
+        WorkshopRegistration reg = registrationRepository
+                .findByWorkshopIdAndStudentId(workshopId, student.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        reg.setPaymentStatus("PAID");
+        registrationRepository.save(reg);
     }
 
     @Transactional(readOnly = true)
+    public List<WorkshopRegistrantResponse> getRegistrants(Long workshopId) {
+        return registrationRepository.findByWorkshopId(workshopId)
+                .stream()
+                .map(reg -> WorkshopRegistrantResponse.builder()
+                        .studentProfileId(reg.getStudent().getId())
+                        .fullName(reg.getStudent().getUser().getFullName())
+                        .email(reg.getStudent().getUser().getEmail())
+                        .paymentStatus(reg.getPaymentStatus())
+                        .registeredAt(reg.getRegisteredAt())
+                        .build())
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    @Transactional
     public List<WorkshopResponse> getMyWorkshops(UUID instructorUserId) {
+        syncStaleStatuses();                         // auto-close past workshops first
         InstructorProfile instructor = instructorRepository.findByUserId(instructorUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.INSTRUCTOR_PROFILE_NOT_FOUND));
 
@@ -178,7 +201,101 @@ public class WorkshopService {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
+    @Transactional
+    public List<RegisteredWorkshopResponse> getMyRegistrations(UUID studentUserId) {
+        syncStaleStatuses();    // ensure statuses are current before returning
+        return registrationRepository.findByStudent_User_Id(studentUserId)
+                .stream()
+                .map(reg -> {
+                    Workshop w = reg.getWorkshop();
+                    return RegisteredWorkshopResponse.builder()
+                            .id(w.getId())
+                            .instructorId(w.getInstructor().getId())
+                            .instructorName(w.getInstructor().getUser().getFullName())
+                            .title(w.getTitle())
+                            .description(w.getDescription())
+                            .danceStyle(w.getDanceStyle())
+                            .venue(w.getVenue())
+                            .city(w.getCity())
+                            .online(w.isOnline())
+                            .meetingLink(w.getMeetingLink())
+                            .workshopDate(w.getWorkshopDate())
+                            .startTime(w.getStartTime())
+                            .endTime(w.getEndTime())
+                            .price(w.getPrice())
+                            .totalSeats(w.getTotalSeats())
+                            .registeredSeats(w.getRegisteredSeats())
+                            .seatsLeft(w.getTotalSeats() - w.getRegisteredSeats())
+                            .status(w.getStatus())
+                            .paymentStatus(reg.getPaymentStatus())
+                            .registeredAt(reg.getRegisteredAt())
+                            .build();
+                })
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
     // ── helpers ──────────────────────────────────────────────────────────────
+
+    /**
+     * Auto-syncs workshop statuses based on current date AND time:
+     *
+     *  • date < today                          → COMPLETED
+     *  • date == today && now > endTime        → COMPLETED
+     *  • date == today && now is during window → ONGOING
+     *  • date > today (or today but not started) → UPCOMING (no change)
+     *
+     * Called eagerly before every workshop list endpoint so the DB is always
+     * in sync without needing a background scheduler.
+     */
+    @CacheEvict(value = CacheConfig.CACHE_WORKSHOPS, allEntries = true)
+    @Transactional
+    public void syncStaleStatuses() {
+        LocalDate today = LocalDate.now();
+        LocalTime now   = LocalTime.now();
+
+        List<Workshop> active = workshopRepository.findAllByStatusIn(
+                List.of(WorkshopStatus.UPCOMING, WorkshopStatus.ONGOING)
+        );
+
+        List<Workshop> toUpdate = new ArrayList<>();
+        for (Workshop w : active) {
+            WorkshopStatus computed = computeWorkshopStatus(w, today, now);
+            if (computed != w.getStatus()) {
+                w.setStatus(computed);
+                toUpdate.add(w);
+            }
+        }
+        if (!toUpdate.isEmpty()) {
+            workshopRepository.saveAll(toUpdate);
+        }
+    }
+
+    /**
+     * Pure function — determines what a workshop's status should be right now.
+     * Does NOT touch the DB; call syncStaleStatuses() for persistence.
+     */
+    private WorkshopStatus computeWorkshopStatus(Workshop w, LocalDate today, LocalTime now) {
+        LocalDate date  = w.getWorkshopDate();
+        LocalTime start = w.getStartTime();
+        LocalTime end   = w.getEndTime();
+
+        if (date.isBefore(today)) {
+            // Past date → always completed
+            return WorkshopStatus.COMPLETED;
+        }
+        if (date.isEqual(today)) {
+            if (now.isAfter(end)) {
+                // Today but past end time → completed
+                return WorkshopStatus.COMPLETED;
+            }
+            if (!now.isBefore(start)) {
+                // Today and within the window → live
+                return WorkshopStatus.ONGOING;
+            }
+        }
+        // Future date, or today but hasn't started yet
+        return WorkshopStatus.UPCOMING;
+    }
 
     private Workshop findWorkshop(Long id) {
         return workshopRepository.findById(id)

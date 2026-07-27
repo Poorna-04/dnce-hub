@@ -97,20 +97,20 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+      {/* Stats — 3 cols for instructor, 4 for student */}
+      <div className={`grid gap-4 mb-10 ${isInstructor ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-2 lg:grid-cols-4"}`}>
         {isInstructor ? (
           <>
-            <StatCard label="Upcoming Bookings" value={upcomingCount} icon={CalendarDays} href="/bookings"  color="violet" />
-            <StatCard label="My Workshops"       value={workshops.length} icon={BookOpen} href="/workshops/my" color="sky" />
-            <StatCard label="Profile"            value="Active"       icon={Users}        href="/profile"   color="emerald" />
-            <StatCard label="Slots"              value="—"            icon={TrendingUp} />
+            <StatCard label="Student Bookings" value={upcomingCount}    icon={CalendarDays} href="/bookings"     color="violet" />
+            <StatCard label="My Workshops"     value={workshops.length} icon={BookOpen}     href="/workshops/my" color="sky" />
+            <StatCard label="My Profile"       value="Manage"           icon={Users}        href="/profile"      color="emerald" />
           </>
         ) : (
+          // Student: 4-column grid
           <>
-            <StatCard label="Upcoming Bookings"  value={upcomingCount} icon={CalendarDays} href="/bookings"    color="violet" />
+            <StatCard label="Upcoming Bookings"  value={upcomingCount} icon={CalendarDays} href="/bookings"          color="violet" />
             <StatCard label="Saved Instructors"  value={savedCount}    icon={Users}        href="/instructors/saved" color="emerald" />
-            <StatCard label="Browse Workshops"   value="Explore"       icon={BookOpen}     href="/workshops"   color="sky" />
+            <StatCard label="Browse Workshops"   value="Explore"       icon={BookOpen}     href="/workshops"         color="sky" />
             <StatCard label="History"            value="—"             icon={TrendingUp}   href="/bookings" />
           </>
         )}
@@ -124,10 +124,10 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {isInstructor ? (
             <>
-              <QuickAction href="/profile"   label="Manage Availability"  description="Add or edit your time slots" />
-              <QuickAction href="/bookings"  label="View Bookings"         description="See your upcoming schedule" />
-              <QuickAction href="/workshops/my" label="My Workshops"       description="Create and manage workshops" />
-              <QuickAction href="/workshops" label="Browse All Workshops"  description="See what's happening" />
+              <QuickAction href="/profile"      label="Manage Availability" description="Add or edit your time slots" />
+              <QuickAction href="/bookings"     label="Student Bookings"    description="See who booked your sessions" />
+              <QuickAction href="/workshops/my" label="My Workshops"        description="Create and manage workshops" />
+              <QuickAction href="/profile"      label="Edit Profile"        description="Update your rates and styles" />
             </>
           ) : (
             <>

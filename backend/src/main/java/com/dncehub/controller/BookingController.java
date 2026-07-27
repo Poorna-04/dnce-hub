@@ -41,6 +41,11 @@ public class BookingController {
         return ResponseEntity.ok(ApiResponse.ok("Booking confirmed", bookingService.confirm(id)));
     }
 
+    @PatchMapping("/{id}/pay")
+    public ResponseEntity<ApiResponse<BookingResponse>> pay(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.ok("Payment successful", bookingService.pay(id)));
+    }
+
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<ApiResponse<BookingResponse>> cancel(@PathVariable Long id) {
         // Derive who is cancelling from the JWT role — no query param needed
@@ -56,13 +61,20 @@ public class BookingController {
 
     @GetMapping("/my/upcoming")
     public ResponseEntity<ApiResponse<List<BookingResponse>>> upcoming() {
-        return ResponseEntity.ok(ApiResponse.ok(
-                bookingService.getUpcoming(SecurityUtils.getCurrentUserId())));
+        // SecurityUtils.getCurrentUserRole() already strips "ROLE_" prefix → returns "INSTRUCTOR" or "STUDENT"
+        boolean isInstructor = "INSTRUCTOR".equals(SecurityUtils.getCurrentUserRole());
+        List<BookingResponse> result = isInstructor
+                ? bookingService.getUpcomingForInstructor(SecurityUtils.getCurrentUserId())
+                : bookingService.getUpcoming(SecurityUtils.getCurrentUserId());
+        return ResponseEntity.ok(ApiResponse.ok(result));
     }
 
     @GetMapping("/my/history")
     public ResponseEntity<ApiResponse<List<BookingResponse>>> history() {
-        return ResponseEntity.ok(ApiResponse.ok(
-                bookingService.getHistory(SecurityUtils.getCurrentUserId())));
+        boolean isInstructor = "INSTRUCTOR".equals(SecurityUtils.getCurrentUserRole());
+        List<BookingResponse> result = isInstructor
+                ? bookingService.getHistoryForInstructor(SecurityUtils.getCurrentUserId())
+                : bookingService.getHistory(SecurityUtils.getCurrentUserId());
+        return ResponseEntity.ok(ApiResponse.ok(result));
     }
 }
