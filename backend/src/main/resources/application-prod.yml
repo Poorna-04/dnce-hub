@@ -1,8 +1,18 @@
+# Production overrides. Connection details come from SPRING_DATASOURCE_* env
+# vars (declared in the base application.yml) — nothing secret lives here.
 spring:
   datasource:
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USERNAME}
-    password: ${DATABASE_PASSWORD}
+    hikari:
+      # Neon's free tier caps concurrent connections; keep the pool small and
+      # use the *pooled* connection string in SPRING_DATASOURCE_URL.
+      maximum-pool-size: 5
+      minimum-idle: 1
+      # Neon scales to zero, so the first connection after an idle period is slow.
+      connection-timeout: 30000
+      idle-timeout: 300000
+      max-lifetime: 900000
+
   jpa:
     hibernate:
       ddl-auto: validate
+    show-sql: false

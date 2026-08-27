@@ -4,12 +4,46 @@ server:
 spring:
   application:
     name: dncehub-backend
+
+  # Loads backend/.env (gitignored) when present, so local runs get their
+  # secrets from a file instead of exported shell variables. `optional:` means
+  # this is a no-op in Docker and production, where the file does not exist.
+  # The [.properties] hint tells Spring how to parse an extensionless file.
+  #
+  # Precedence: real OS environment variables outrank config files, so a
+  # container's env always wins over anything a stray .env might contain.
+  config:
+    import: optional:file:.env[.properties]
+
+  # No defaults here on purpose: every environment must supply these
+  # explicitly, so a missing variable fails loudly instead of silently falling
+  # back to something wrong. Locally they come from backend/.env.
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
+      host: ${REDIS_HOST}
       port: ${REDIS_PORT:6379}
   cache:
     type: redis
+
+  # Flyway owns the schema. It runs before Hibernate starts, so `validate`
+  # below is checking the entities against a schema Flyway just applied
+  # (or, on first boot against a pre-existing Neon DB, against the schema
+  # that Hibernate created before Flyway existed).
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    # true = on a non-empty DB with no flyway_schema_history table, record
+    # the current schema as version 1 and skip V1__init.sql. Empty DBs are
+    # unaffected: they still run V1 from scratch. After the history table
+    # exists, this flag is a no-op.
+    baseline-on-migrate: true
+    baseline-version: 1
+
   jpa:
     open-in-view: false
     hibernate:
@@ -26,6 +60,9 @@ app:
     workshops-ttl-seconds: 180     # 3 minutes
     single-item-ttl-seconds: 600   # 10 minutes
   jwt:
-    secret: XRcEs8FnQe5PVZAHTK02rBzRajR+Tb2nj8gXLsoyPYQ=
+    # No default on purpose — a deployed app must fail to start rather than boot
+    # with a secret that is public in the repo. The dev profile overrides this
+    # with a throwaway local key. See backend/.env.example.
+    secret: ${JWT_SECRET}
     access-token-expiry-ms: 900000      # 15 minutes
     refresh-token-expiry-ms: 604800000  # 7 days
