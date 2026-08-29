@@ -1,0 +1,1 @@
+# Keep this folder so the Docker image can COPY ./public
