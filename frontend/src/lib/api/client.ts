@@ -1,11 +1,9 @@
 import axios from "axios";
 import { getCookieValue } from "@/lib/auth/decode-token";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api/v1";
+import { BROWSER_API_BASE } from "@/lib/api/env";
 
 export const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: BROWSER_API_BASE,
   headers: { "Content-Type": "application/json" },
 });
 

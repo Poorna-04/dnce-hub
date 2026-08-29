@@ -1,7 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api/v1";
+import { SPRING_API_BASE } from "@/lib/api/env";
 
 export async function POST() {
   const cookieStore = await cookies();
@@ -10,7 +9,7 @@ export async function POST() {
   // Best-effort: tell Spring Boot to revoke the refresh token in the DB.
   if (refreshToken) {
     try {
-      await fetch(`${API_BASE}/auth/logout`, {
+      await fetch(`${SPRING_API_BASE}/auth/logout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refreshToken }),

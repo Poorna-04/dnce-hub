@@ -1,9 +1,6 @@
 import { cookies } from "next/headers";
 import type { ApiResponse } from "@/types/api";
-
-// Server-side calls go directly to Spring Boot — no proxy needed since
-// there's no browser involved, so CORS rules don't apply.
-const SPRING_BASE = process.env.SPRING_BASE_URL ?? "http://localhost:8080/api/v1";
+import { SPRING_API_BASE } from "@/lib/api/env";
 
 /**
  * Fetches a Spring Boot endpoint from a Server Component.
@@ -27,7 +24,7 @@ export async function serverFetch<T>(
     if (token) headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${SPRING_BASE}${path}`, {
+  const res = await fetch(`${SPRING_API_BASE}${path}`, {
     ...fetchOptions,
     headers,
     next: { revalidate: 0 }, // always fresh; Redis on Spring Boot handles caching
