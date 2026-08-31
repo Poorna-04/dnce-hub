@@ -75,12 +75,12 @@ public class WorkshopController {
             @PathVariable Long id,
             @Valid @RequestBody WorkshopRequest request) {
         return ResponseEntity.ok(ApiResponse.ok("Workshop updated",
-                workshopService.update(id, request)));
+                workshopService.update(id, SecurityUtils.getCurrentUserId(), request)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> cancel(@PathVariable Long id) {
-        workshopService.cancel(id);
+        workshopService.cancel(id, SecurityUtils.getCurrentUserId());
         return ResponseEntity.ok(ApiResponse.ok("Workshop cancelled", null));
     }
 

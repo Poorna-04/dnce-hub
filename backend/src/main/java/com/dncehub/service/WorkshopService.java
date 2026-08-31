@@ -87,8 +87,9 @@ public class WorkshopService {
 
     @CacheEvict(value = CacheConfig.CACHE_WORKSHOPS, allEntries = true)
     @Transactional
-    public WorkshopResponse update(Long id, WorkshopRequest request) {
+    public WorkshopResponse update(Long id, UUID instructorUserId, WorkshopRequest request) {
         Workshop workshop = findWorkshop(id);
+        assertOwner(workshop, instructorUserId);
 
         if (workshop.getStatus() == WorkshopStatus.CANCELLED) {
             throw new AppException(ErrorCode.BOOKING_INVALID_STATUS);
@@ -103,8 +104,9 @@ public class WorkshopService {
 
     @CacheEvict(value = CacheConfig.CACHE_WORKSHOPS, allEntries = true)
     @Transactional
-    public void cancel(Long id) {
+    public void cancel(Long id, UUID instructorUserId) {
         Workshop workshop = findWorkshop(id);
+        assertOwner(workshop, instructorUserId);
         if (workshop.getStatus() == WorkshopStatus.CANCELLED) {
             throw new AppException(ErrorCode.BOOKING_INVALID_STATUS);
         }
@@ -178,9 +180,7 @@ public class WorkshopService {
     @Transactional(readOnly = true)
     public List<WorkshopRegistrantResponse> getRegistrants(Long workshopId, UUID instructorUserId) {
         Workshop workshop = findWorkshop(workshopId);
-        if (!workshop.getInstructor().getUser().getId().equals(instructorUserId)) {
-            throw new AppException(ErrorCode.ACCESS_DENIED);
-        }
+        assertOwner(workshop, instructorUserId);
 
         return registrationRepository.findByWorkshopId(workshopId)
                 .stream()
@@ -305,6 +305,12 @@ public class WorkshopService {
     private Workshop findWorkshop(Long id) {
         return workshopRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.WORKSHOP_NOT_FOUND));
+    }
+
+    private void assertOwner(Workshop workshop, UUID instructorUserId) {
+        if (!workshop.getInstructor().getUser().getId().equals(instructorUserId)) {
+            throw new AppException(ErrorCode.ACCESS_DENIED);
+        }
     }
 
     private void applyRequest(Workshop w, WorkshopRequest r) {

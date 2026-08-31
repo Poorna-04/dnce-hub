@@ -33,17 +33,20 @@ public class BookingController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<BookingResponse>> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.ok(bookingService.getById(id)));
+        return ResponseEntity.ok(ApiResponse.ok(
+                bookingService.getById(id, SecurityUtils.getCurrentUserId())));
     }
 
     @PatchMapping("/{id}/confirm")
     public ResponseEntity<ApiResponse<BookingResponse>> confirm(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.ok("Booking confirmed", bookingService.confirm(id)));
+        return ResponseEntity.ok(ApiResponse.ok("Booking confirmed",
+                bookingService.confirm(id, SecurityUtils.getCurrentUserId())));
     }
 
     @PatchMapping("/{id}/pay")
     public ResponseEntity<ApiResponse<BookingResponse>> pay(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.ok("Payment successful", bookingService.pay(id)));
+        return ResponseEntity.ok(ApiResponse.ok("Payment successful",
+                bookingService.pay(id, SecurityUtils.getCurrentUserId())));
     }
 
     @PatchMapping("/{id}/cancel")
@@ -51,12 +54,13 @@ public class BookingController {
         // Derive who is cancelling from the JWT role — no query param needed
         String role = SecurityUtils.getCurrentUserRole();
         return ResponseEntity.ok(ApiResponse.ok("Booking cancelled",
-                bookingService.cancel(id, role)));
+                bookingService.cancel(id, SecurityUtils.getCurrentUserId(), role)));
     }
 
     @PatchMapping("/{id}/complete")
     public ResponseEntity<ApiResponse<BookingResponse>> complete(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.ok("Booking completed", bookingService.complete(id)));
+        return ResponseEntity.ok(ApiResponse.ok("Booking completed",
+                bookingService.complete(id, SecurityUtils.getCurrentUserId())));
     }
 
     @GetMapping("/my/upcoming")

@@ -3,6 +3,7 @@ package com.dncehub.controller;
 import com.dncehub.dto.request.AvailabilitySlotRequest;
 import com.dncehub.dto.response.ApiResponse;
 import com.dncehub.dto.response.AvailabilitySlotResponse;
+import com.dncehub.security.SecurityUtils;
 import com.dncehub.service.AvailabilitySlotService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -29,26 +30,25 @@ public class AvailabilitySlotController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<AvailabilitySlotResponse>> addSlot(
-            @PathVariable Long instructorId,
             @Valid @RequestBody AvailabilitySlotRequest request) {
+        // Path instructorId is ignored for writes — slots always attach to the caller.
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Slot added", service.addSlot(instructorId, request)));
+                .body(ApiResponse.ok("Slot added",
+                        service.addSlot(SecurityUtils.getCurrentUserId(), request)));
     }
 
     @PutMapping("/{slotId}")
     public ResponseEntity<ApiResponse<AvailabilitySlotResponse>> updateSlot(
-            @PathVariable Long instructorId,
             @PathVariable Long slotId,
             @Valid @RequestBody AvailabilitySlotRequest request) {
-        return ResponseEntity.ok(ApiResponse.ok("Slot updated", service.updateSlot(instructorId, slotId, request)));
+        return ResponseEntity.ok(ApiResponse.ok("Slot updated",
+                service.updateSlot(SecurityUtils.getCurrentUserId(), slotId, request)));
     }
 
     @DeleteMapping("/{slotId}")
-    public ResponseEntity<ApiResponse<Void>> deleteSlot(
-            @PathVariable Long instructorId,
-            @PathVariable Long slotId) {
-        service.deleteSlot(instructorId, slotId);
+    public ResponseEntity<ApiResponse<Void>> deleteSlot(@PathVariable Long slotId) {
+        service.deleteSlot(SecurityUtils.getCurrentUserId(), slotId);
         return ResponseEntity.ok(ApiResponse.ok("Slot deleted", null));
     }
 }

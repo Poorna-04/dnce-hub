@@ -99,26 +99,52 @@ public class InstructorProfileService {
 
     @CacheEvict(value = CacheConfig.CACHE_INSTRUCTORS, allEntries = true)
     @Transactional
-    public InstructorProfileResponse update(Long id, InstructorProfileRequest request) {
-        InstructorProfile profile = instructorProfileRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.INSTRUCTOR_PROFILE_NOT_FOUND));
-
-        profile.setExperienceYears(request.getExperienceYears());
-        profile.setDanceStyles(request.getDanceStyles());
-        profile.setHourlyRate(request.getHourlyRate());
-        profile.setCity(request.getCity());
-        profile.setTeachingMode(request.getTeachingMode());
-
+    public InstructorProfileResponse update(UUID userId, InstructorProfileRequest request) {
+        InstructorProfile profile = findByUserId(userId);
+        applyRequest(profile, request);
         return toResponse(instructorProfileRepository.save(profile));
     }
 
     @CacheEvict(value = CacheConfig.CACHE_INSTRUCTORS, allEntries = true)
     @Transactional
-    public void delete(Long id) {
-        if (!instructorProfileRepository.existsById(id)) {
-            throw new AppException(ErrorCode.INSTRUCTOR_PROFILE_NOT_FOUND);
+    public InstructorProfileResponse update(Long id, UUID userId, InstructorProfileRequest request) {
+        InstructorProfile profile = findOwnedById(id, userId);
+        applyRequest(profile, request);
+        return toResponse(instructorProfileRepository.save(profile));
+    }
+
+    @CacheEvict(value = CacheConfig.CACHE_INSTRUCTORS, allEntries = true)
+    @Transactional
+    public void delete(UUID userId) {
+        instructorProfileRepository.delete(findByUserId(userId));
+    }
+
+    @CacheEvict(value = CacheConfig.CACHE_INSTRUCTORS, allEntries = true)
+    @Transactional
+    public void delete(Long id, UUID userId) {
+        instructorProfileRepository.delete(findOwnedById(id, userId));
+    }
+
+    private InstructorProfile findByUserId(UUID userId) {
+        return instructorProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.INSTRUCTOR_PROFILE_NOT_FOUND));
+    }
+
+    private InstructorProfile findOwnedById(Long id, UUID userId) {
+        InstructorProfile profile = instructorProfileRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.INSTRUCTOR_PROFILE_NOT_FOUND));
+        if (!profile.getUser().getId().equals(userId)) {
+            throw new AppException(ErrorCode.ACCESS_DENIED);
         }
-        instructorProfileRepository.deleteById(id);
+        return profile;
+    }
+
+    private void applyRequest(InstructorProfile profile, InstructorProfileRequest request) {
+        profile.setExperienceYears(request.getExperienceYears());
+        profile.setDanceStyles(request.getDanceStyles());
+        profile.setHourlyRate(request.getHourlyRate());
+        profile.setCity(request.getCity());
+        profile.setTeachingMode(request.getTeachingMode());
     }
 
     private InstructorProfileResponse toResponse(InstructorProfile profile) {

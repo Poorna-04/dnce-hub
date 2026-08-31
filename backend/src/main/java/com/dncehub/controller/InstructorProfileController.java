@@ -58,17 +58,30 @@ public class InstructorProfileController {
                         instructorProfileService.create(SecurityUtils.getCurrentUserId(), request)));
     }
 
+    @PutMapping("/me")
+    public ResponseEntity<ApiResponse<InstructorProfileResponse>> updateMe(
+            @Valid @RequestBody InstructorProfileRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok("Instructor profile updated",
+                instructorProfileService.update(SecurityUtils.getCurrentUserId(), request)));
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<ApiResponse<Void>> deleteMe() {
+        instructorProfileService.delete(SecurityUtils.getCurrentUserId());
+        return ResponseEntity.ok(ApiResponse.ok("Instructor profile deleted", null));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<InstructorProfileResponse>> update(
             @PathVariable Long id,
             @Valid @RequestBody InstructorProfileRequest request) {
         return ResponseEntity.ok(ApiResponse.ok("Instructor profile updated",
-                instructorProfileService.update(id, request)));
+                instructorProfileService.update(id, SecurityUtils.getCurrentUserId(), request)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
-        instructorProfileService.delete(id);
+        instructorProfileService.delete(id, SecurityUtils.getCurrentUserId());
         return ResponseEntity.ok(ApiResponse.ok("Instructor profile deleted", null));
     }
 }

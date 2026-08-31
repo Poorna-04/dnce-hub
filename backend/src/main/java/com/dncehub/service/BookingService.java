@@ -77,13 +77,16 @@ public class BookingService {
     }
 
     @Transactional(readOnly = true)
-    public BookingResponse getById(Long id) {
-        return toResponse(findBooking(id));
+    public BookingResponse getById(Long id, UUID userId) {
+        Booking booking = findBooking(id);
+        assertParty(booking, userId);
+        return toResponse(booking);
     }
 
     @Transactional
-    public BookingResponse confirm(Long id) {
+    public BookingResponse confirm(Long id, UUID userId) {
         Booking booking = findBooking(id);
+        assertInstructor(booking, userId);
         assertStatus(booking, BookingStatus.PENDING);
         booking.setStatus(BookingStatus.CONFIRMED);
         return toResponse(bookingRepository.save(booking));
@@ -91,16 +94,18 @@ public class BookingService {
 
     /** Simulates student payment — moves booking from PENDING → CONFIRMED */
     @Transactional
-    public BookingResponse pay(Long id) {
+    public BookingResponse pay(Long id, UUID userId) {
         Booking booking = findBooking(id);
+        assertStudent(booking, userId);
         assertStatus(booking, BookingStatus.PENDING);
         booking.setStatus(BookingStatus.CONFIRMED);
         return toResponse(bookingRepository.save(booking));
     }
 
     @Transactional
-    public BookingResponse cancel(Long id, String cancelledBy) {
+    public BookingResponse cancel(Long id, UUID userId, String cancelledBy) {
         Booking booking = findBooking(id);
+        assertParty(booking, userId);
         if (booking.getStatus() == BookingStatus.COMPLETED
                 || booking.getStatus() == BookingStatus.CANCELLED) {
             throw new AppException(ErrorCode.BOOKING_INVALID_STATUS);
@@ -111,8 +116,9 @@ public class BookingService {
     }
 
     @Transactional
-    public BookingResponse complete(Long id) {
+    public BookingResponse complete(Long id, UUID userId) {
         Booking booking = findBooking(id);
+        assertInstructor(booking, userId);
         assertStatus(booking, BookingStatus.CONFIRMED);
         booking.setStatus(BookingStatus.COMPLETED);
         return toResponse(bookingRepository.save(booking));
@@ -187,6 +193,32 @@ public class BookingService {
     private Booking findBooking(Long id) {
         return bookingRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+    }
+
+    private void assertParty(Booking booking, UUID userId) {
+        if (!isStudent(booking, userId) && !isInstructor(booking, userId)) {
+            throw new AppException(ErrorCode.ACCESS_DENIED);
+        }
+    }
+
+    private void assertInstructor(Booking booking, UUID userId) {
+        if (!isInstructor(booking, userId)) {
+            throw new AppException(ErrorCode.ACCESS_DENIED);
+        }
+    }
+
+    private void assertStudent(Booking booking, UUID userId) {
+        if (!isStudent(booking, userId)) {
+            throw new AppException(ErrorCode.ACCESS_DENIED);
+        }
+    }
+
+    private boolean isStudent(Booking booking, UUID userId) {
+        return booking.getStudent().getUser().getId().equals(userId);
+    }
+
+    private boolean isInstructor(Booking booking, UUID userId) {
+        return booking.getInstructor().getUser().getId().equals(userId);
     }
 
     private void assertStatus(Booking booking, BookingStatus required) {

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class AvailabilitySlotService {
@@ -34,12 +35,11 @@ public class AvailabilitySlotService {
     }
 
     @Transactional
-    public AvailabilitySlotResponse addSlot(Long instructorId, AvailabilitySlotRequest request) {
-        InstructorProfile instructor = instructorRepository.findById(instructorId)
-                .orElseThrow(() -> new AppException(ErrorCode.INSTRUCTOR_PROFILE_NOT_FOUND));
+    public AvailabilitySlotResponse addSlot(UUID instructorUserId, AvailabilitySlotRequest request) {
+        InstructorProfile instructor = findInstructorByUserId(instructorUserId);
 
         validate(request);
-        checkOverlap(instructorId, -1L, request);
+        checkOverlap(instructor.getId(), -1L, request);
 
         AvailabilitySlot slot = new AvailabilitySlot();
         slot.setInstructor(instructor);
@@ -49,23 +49,30 @@ public class AvailabilitySlotService {
     }
 
     @Transactional
-    public AvailabilitySlotResponse updateSlot(Long instructorId, Long slotId, AvailabilitySlotRequest request) {
-        AvailabilitySlot slot = getOwnedSlot(instructorId, slotId);
+    public AvailabilitySlotResponse updateSlot(UUID instructorUserId, Long slotId, AvailabilitySlotRequest request) {
+        InstructorProfile instructor = findInstructorByUserId(instructorUserId);
+        AvailabilitySlot slot = getOwnedSlot(instructor.getId(), slotId);
 
         validate(request);
-        checkOverlap(instructorId, slotId, request);
+        checkOverlap(instructor.getId(), slotId, request);
 
         applyRequest(slot, request);
         return toResponse(slotRepository.save(slot));
     }
 
     @Transactional
-    public void deleteSlot(Long instructorId, Long slotId) {
-        AvailabilitySlot slot = getOwnedSlot(instructorId, slotId);
+    public void deleteSlot(UUID instructorUserId, Long slotId) {
+        InstructorProfile instructor = findInstructorByUserId(instructorUserId);
+        AvailabilitySlot slot = getOwnedSlot(instructor.getId(), slotId);
         slotRepository.delete(slot);
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────
+
+    private InstructorProfile findInstructorByUserId(UUID userId) {
+        return instructorRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.INSTRUCTOR_PROFILE_NOT_FOUND));
+    }
 
     private void assertInstructorExists(Long instructorId) {
         if (!instructorRepository.existsById(instructorId)) {

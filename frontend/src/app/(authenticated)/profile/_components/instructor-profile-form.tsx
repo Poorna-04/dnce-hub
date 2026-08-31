@@ -58,7 +58,7 @@ export function InstructorProfileForm({ existing }: Props) {
   async function onSubmit(data: InstructorProfileFormValues) {
     try {
       if (isEdit) {
-        await apiClient.put(`/instructors/${existing.id}`, data);
+        await apiClient.put("/instructors/me", data);
         toast.success("Profile updated!");
       } else {
         await apiClient.post("/instructors", data);
