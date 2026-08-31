@@ -1,0 +1,21 @@
+# Reverse proxy for local Compose and (later) the droplet.
+#
+# Local:  http://localhost
+# Droplet: replace `:80` with your domain (e.g. dncehub.example.com) and
+#          Caddy will obtain a Let's Encrypt cert on :443 automatically.
+#
+# Routing:
+#   /api/v1/*  → Spring Boot  (AuthController, bookings, workshops, …)
+#   everything else → Next.js, including /api/auth/* (set-token, logout)
+
+:80 {
+	encode gzip
+
+	handle /api/v1* {
+		reverse_proxy backend:8080
+	}
+
+	handle {
+		reverse_proxy frontend:3000
+	}
+}

@@ -1,10 +1,7 @@
 # Overlay: Next.js `next dev` with bind-mounted source (hot reload).
-# Postgres / Redis / backend stay as the production images.
+# Caddy / postgres / redis / backend stay as in docker-compose.yml.
 #
-#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
-#
-# WATCHPACK_POLLING is set because Docker Desktop on Windows often misses
-# native file events on bind mounts.
+#   docker compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml up --build
 
 services:
   frontend:
@@ -12,7 +9,7 @@ services:
     build: !reset
     working_dir: /app
     volumes:
-      - ./frontend:/app
+      - ../frontend:/app
       - frontend_node_modules:/app/node_modules
     command: sh -c "npm ci && npm run dev -- --hostname 0.0.0.0 --port 3000"
     environment:
@@ -20,8 +17,6 @@ services:
       SPRING_BASE_URL: http://backend:8080/api/v1
       WATCHPACK_POLLING: "true"
       CHOKIDAR_USEPOLLING: "true"
-    ports:
-      - "3000:3000"
     depends_on:
       backend:
         condition: service_healthy
