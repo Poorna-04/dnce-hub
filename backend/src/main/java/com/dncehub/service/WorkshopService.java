@@ -58,14 +58,14 @@ public class WorkshopService {
         } else {
             workshops = workshopRepository.fetchUpcoming();
         }
-        return workshops.stream().map(this::toResponse)
+        return workshops.stream().map(this::toPublicResponse)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Cacheable(value = CacheConfig.CACHE_WORKSHOPS, key = "'id_' + #id")
     @Transactional(readOnly = true)
     public WorkshopResponse getById(Long id) {
-        return toResponse(findWorkshop(id));
+        return toPublicResponse(findWorkshop(id));
     }
 
     @CacheEvict(value = CacheConfig.CACHE_WORKSHOPS, allEntries = true)
@@ -176,7 +176,12 @@ public class WorkshopService {
     }
 
     @Transactional(readOnly = true)
-    public List<WorkshopRegistrantResponse> getRegistrants(Long workshopId) {
+    public List<WorkshopRegistrantResponse> getRegistrants(Long workshopId, UUID instructorUserId) {
+        Workshop workshop = findWorkshop(workshopId);
+        if (!workshop.getInstructor().getUser().getId().equals(instructorUserId)) {
+            throw new AppException(ErrorCode.ACCESS_DENIED);
+        }
+
         return registrationRepository.findByWorkshopId(workshopId)
                 .stream()
                 .map(reg -> WorkshopRegistrantResponse.builder()
@@ -318,7 +323,15 @@ public class WorkshopService {
         w.setTotalSeats(r.getTotalSeats());
     }
 
+    private WorkshopResponse toPublicResponse(Workshop w) {
+        return toResponse(w, false);
+    }
+
     private WorkshopResponse toResponse(Workshop w) {
+        return toResponse(w, true);
+    }
+
+    private WorkshopResponse toResponse(Workshop w, boolean includeMeetingLink) {
         return WorkshopResponse.builder()
                 .id(w.getId())
                 .instructorId(w.getInstructor().getId())
@@ -330,7 +343,7 @@ public class WorkshopService {
                 .venue(w.getVenue())
                 .city(w.getCity())
                 .online(w.isOnline())
-                .meetingLink(w.getMeetingLink())
+                .meetingLink(includeMeetingLink ? w.getMeetingLink() : null)
                 .workshopDate(w.getWorkshopDate())
                 .startTime(w.getStartTime())
                 .endTime(w.getEndTime())

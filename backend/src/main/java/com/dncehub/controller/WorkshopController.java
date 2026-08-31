@@ -40,7 +40,8 @@ public class WorkshopController {
     @GetMapping("/{id}/registrants")
     public ResponseEntity<ApiResponse<List<WorkshopRegistrantResponse>>> getRegistrants(
             @PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.ok(workshopService.getRegistrants(id)));
+        return ResponseEntity.ok(ApiResponse.ok(
+                workshopService.getRegistrants(id, SecurityUtils.getCurrentUserId())));
     }
 
     @GetMapping("/my-registrations")

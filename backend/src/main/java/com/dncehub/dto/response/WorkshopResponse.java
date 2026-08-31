@@ -1,6 +1,7 @@
 package com.dncehub.dto.response;
 
 import com.dncehub.entity.enums.WorkshopStatus;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,6 +20,7 @@ public class WorkshopResponse {
     private String venue;
     private String city;
     private boolean online;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String meetingLink;
     private LocalDate workshopDate;
     private LocalTime startTime;
