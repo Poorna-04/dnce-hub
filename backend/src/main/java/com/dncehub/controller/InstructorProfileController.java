@@ -8,6 +8,7 @@ import com.dncehub.service.InstructorProfileService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -49,6 +50,7 @@ public class InstructorProfileController {
         return ResponseEntity.ok(ApiResponse.ok(instructorProfileService.getById(id)));
     }
 
+    @PreAuthorize("hasRole('INSTRUCTOR')")
     @PostMapping
     public ResponseEntity<ApiResponse<InstructorProfileResponse>> create(
             @Valid @RequestBody InstructorProfileRequest request) {
@@ -58,6 +60,7 @@ public class InstructorProfileController {
                         instructorProfileService.create(SecurityUtils.getCurrentUserId(), request)));
     }
 
+    @PreAuthorize("hasRole('INSTRUCTOR')")
     @PutMapping("/me")
     public ResponseEntity<ApiResponse<InstructorProfileResponse>> updateMe(
             @Valid @RequestBody InstructorProfileRequest request) {
@@ -65,12 +68,14 @@ public class InstructorProfileController {
                 instructorProfileService.update(SecurityUtils.getCurrentUserId(), request)));
     }
 
+    @PreAuthorize("hasRole('INSTRUCTOR')")
     @DeleteMapping("/me")
     public ResponseEntity<ApiResponse<Void>> deleteMe() {
         instructorProfileService.delete(SecurityUtils.getCurrentUserId());
         return ResponseEntity.ok(ApiResponse.ok("Instructor profile deleted", null));
     }
 
+    @PreAuthorize("hasRole('INSTRUCTOR')")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<InstructorProfileResponse>> update(
             @PathVariable Long id,
@@ -79,6 +84,7 @@ public class InstructorProfileController {
                 instructorProfileService.update(id, SecurityUtils.getCurrentUserId(), request)));
     }
 
+    @PreAuthorize("hasRole('INSTRUCTOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         instructorProfileService.delete(id, SecurityUtils.getCurrentUserId());

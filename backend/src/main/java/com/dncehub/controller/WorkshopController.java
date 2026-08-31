@@ -10,6 +10,7 @@ import com.dncehub.service.WorkshopService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,6 +51,7 @@ public class WorkshopController {
                 workshopService.getMyRegistrations(SecurityUtils.getCurrentUserId())));
     }
 
+    @PreAuthorize("hasRole('STUDENT')")
     @PatchMapping("/{id}/pay-registration")
     public ResponseEntity<ApiResponse<Void>> payRegistration(@PathVariable Long id) {
         workshopService.payWorkshopRegistration(id, SecurityUtils.getCurrentUserId());
@@ -61,6 +63,7 @@ public class WorkshopController {
         return ResponseEntity.ok(ApiResponse.ok(workshopService.getById(id)));
     }
 
+    @PreAuthorize("hasRole('INSTRUCTOR')")
     @PostMapping
     public ResponseEntity<ApiResponse<WorkshopResponse>> create(
             @Valid @RequestBody WorkshopRequest request) {
@@ -70,6 +73,7 @@ public class WorkshopController {
                         workshopService.create(SecurityUtils.getCurrentUserId(), request)));
     }
 
+    @PreAuthorize("hasRole('INSTRUCTOR')")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<WorkshopResponse>> update(
             @PathVariable Long id,
@@ -78,18 +82,21 @@ public class WorkshopController {
                 workshopService.update(id, SecurityUtils.getCurrentUserId(), request)));
     }
 
+    @PreAuthorize("hasRole('INSTRUCTOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> cancel(@PathVariable Long id) {
         workshopService.cancel(id, SecurityUtils.getCurrentUserId());
         return ResponseEntity.ok(ApiResponse.ok("Workshop cancelled", null));
     }
 
+    @PreAuthorize("hasRole('STUDENT')")
     @PostMapping("/{id}/register")
     public ResponseEntity<ApiResponse<Void>> register(@PathVariable Long id) {
         workshopService.register(id, SecurityUtils.getCurrentUserId());
         return ResponseEntity.ok(ApiResponse.ok("Registered successfully", null));
     }
 
+    @PreAuthorize("hasRole('STUDENT')")
     @DeleteMapping("/{id}/register")
     public ResponseEntity<ApiResponse<Void>> cancelRegistration(@PathVariable Long id) {
         workshopService.cancelRegistration(id, SecurityUtils.getCurrentUserId());

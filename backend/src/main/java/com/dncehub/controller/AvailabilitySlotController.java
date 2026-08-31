@@ -8,6 +8,7 @@ import com.dncehub.service.AvailabilitySlotService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class AvailabilitySlotController {
         return ResponseEntity.ok(ApiResponse.ok(service.getSlots(instructorId)));
     }
 
+    @PreAuthorize("hasRole('INSTRUCTOR')")
     @PostMapping
     public ResponseEntity<ApiResponse<AvailabilitySlotResponse>> addSlot(
             @Valid @RequestBody AvailabilitySlotRequest request) {
@@ -38,6 +40,7 @@ public class AvailabilitySlotController {
                         service.addSlot(SecurityUtils.getCurrentUserId(), request)));
     }
 
+    @PreAuthorize("hasRole('INSTRUCTOR')")
     @PutMapping("/{slotId}")
     public ResponseEntity<ApiResponse<AvailabilitySlotResponse>> updateSlot(
             @PathVariable Long slotId,
@@ -46,6 +49,7 @@ public class AvailabilitySlotController {
                 service.updateSlot(SecurityUtils.getCurrentUserId(), slotId, request)));
     }
 
+    @PreAuthorize("hasRole('INSTRUCTOR')")
     @DeleteMapping("/{slotId}")
     public ResponseEntity<ApiResponse<Void>> deleteSlot(@PathVariable Long slotId) {
         service.deleteSlot(SecurityUtils.getCurrentUserId(), slotId);

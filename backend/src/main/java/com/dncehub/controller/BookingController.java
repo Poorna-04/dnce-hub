@@ -8,6 +8,7 @@ import com.dncehub.service.BookingService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class BookingController {
         this.bookingService = bookingService;
     }
 
+    @PreAuthorize("hasRole('STUDENT')")
     @PostMapping
     public ResponseEntity<ApiResponse<BookingResponse>> create(
             @Valid @RequestBody BookingRequest request) {
@@ -37,12 +39,14 @@ public class BookingController {
                 bookingService.getById(id, SecurityUtils.getCurrentUserId())));
     }
 
+    @PreAuthorize("hasRole('INSTRUCTOR')")
     @PatchMapping("/{id}/confirm")
     public ResponseEntity<ApiResponse<BookingResponse>> confirm(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.ok("Booking confirmed",
                 bookingService.confirm(id, SecurityUtils.getCurrentUserId())));
     }
 
+    @PreAuthorize("hasRole('STUDENT')")
     @PatchMapping("/{id}/pay")
     public ResponseEntity<ApiResponse<BookingResponse>> pay(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.ok("Payment successful",
@@ -57,6 +61,7 @@ public class BookingController {
                 bookingService.cancel(id, SecurityUtils.getCurrentUserId(), role)));
     }
 
+    @PreAuthorize("hasRole('INSTRUCTOR')")
     @PatchMapping("/{id}/complete")
     public ResponseEntity<ApiResponse<BookingResponse>> complete(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.ok("Booking completed",
