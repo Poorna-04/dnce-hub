@@ -16,3 +16,10 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: false
+
+# Belt-and-suspenders: never expose OpenAPI even if another profile is composed.
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
