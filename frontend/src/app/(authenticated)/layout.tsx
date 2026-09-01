@@ -1,6 +1,5 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { decodeToken } from "@/lib/auth/decode-token";
+import { getAuthUser } from "@/lib/auth/server-token";
 import { AuthProvider } from "@/lib/auth/auth-provider";
 import { AppShell } from "./_components";
 
@@ -9,14 +8,7 @@ export default async function AuthenticatedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("dnce_access_token")?.value;
-
-  if (!token) {
-    redirect("/sign-in");
-  }
-
-  const user = decodeToken(token);
+  const user = await getAuthUser();
   if (!user) {
     redirect("/sign-in");
   }

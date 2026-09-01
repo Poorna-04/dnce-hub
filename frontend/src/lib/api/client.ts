@@ -3,6 +3,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from "axios";
 import { getCookieValue } from "@/lib/auth/decode-token";
+import { ACCESS_COOKIE } from "@/lib/auth/cookies";
 import { BROWSER_API_BASE } from "@/lib/api/env";
 
 export const apiClient = axios.create({
@@ -69,7 +70,7 @@ function toErrorMessage(error: AxiosError<{ message?: string }>): string {
 
 // Attach the access token from the browser cookie to every request.
 apiClient.interceptors.request.use((config) => {
-  const token = getCookieValue("dnce_access_token");
+  const token = getCookieValue(ACCESS_COOKIE);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

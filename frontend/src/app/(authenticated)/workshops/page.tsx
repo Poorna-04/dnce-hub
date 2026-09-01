@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
-import { decodeToken } from "@/lib/auth/decode-token";
+import { getAuthUser } from "@/lib/auth/server-token";
 import { ROLES } from "@/types/auth";
 import { serverFetch } from "@/lib/api/server";
 import type { Workshop } from "@/types/workshop";
@@ -44,9 +43,7 @@ async function WorkshopGrid({ city, style }: { city?: string; style?: string }) 
 
 export default async function WorkshopsPage({ searchParams }: PageProps) {
   // Instructors don't browse public workshops — send them to their own
-  const cookieStore = await cookies();
-  const token = cookieStore.get("dnce_access_token")?.value;
-  const user = token ? decodeToken(token) : null;
+  const user = await getAuthUser();
   if (user?.role === ROLES.INSTRUCTOR) redirect("/workshops/my");
 
   const { city, style } = await searchParams;

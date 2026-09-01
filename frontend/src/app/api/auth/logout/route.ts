@@ -1,10 +1,11 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { SPRING_API_BASE } from "@/lib/api/env";
+import { ACCESS_COOKIE, REFRESH_COOKIE } from "@/lib/auth/cookies";
 
 export async function POST() {
   const cookieStore = await cookies();
-  const refreshToken = cookieStore.get("dnce_refresh_token")?.value;
+  const refreshToken = cookieStore.get(REFRESH_COOKIE)?.value;
 
   // Best-effort: tell Spring Boot to revoke the refresh token in the DB.
   if (refreshToken) {
@@ -20,7 +21,7 @@ export async function POST() {
   }
 
   const res = NextResponse.json({ ok: true });
-  res.cookies.delete("dnce_access_token");
-  res.cookies.delete("dnce_refresh_token");
+  res.cookies.delete(ACCESS_COOKIE);
+  res.cookies.delete(REFRESH_COOKIE);
   return res;
 }

@@ -1,9 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MapPin, Clock, ArrowLeft } from "lucide-react";
-import { cookies } from "next/headers";
 import { serverFetch } from "@/lib/api/server";
-import { decodeToken } from "@/lib/auth/decode-token";
+import { getAuthUser } from "@/lib/auth/server-token";
 import { ROLES } from "@/types/auth";
 import type { InstructorProfile, AvailabilitySlot } from "@/types/instructor";
 import { TEACHING_MODE_LABEL } from "@/types/instructor";
@@ -17,9 +16,7 @@ export default async function InstructorDetailPage({ params }: PageProps) {
   const { id } = await params;
 
   // Determine if the current user is a student (only students can book)
-  const cookieStore = await cookies();
-  const token = cookieStore.get("dnce_access_token")?.value;
-  const currentUser = token ? decodeToken(token) : null;
+  const currentUser = await getAuthUser();
   const canBook = currentUser?.role === ROLES.STUDENT;
 
   let instructor: InstructorProfile;

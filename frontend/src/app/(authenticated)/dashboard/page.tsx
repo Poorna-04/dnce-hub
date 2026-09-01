@@ -1,6 +1,5 @@
-import { cookies } from "next/headers";
 import Link from "next/link";
-import { decodeToken } from "@/lib/auth/decode-token";
+import { getAuthUser } from "@/lib/auth/server-token";
 import { serverFetch } from "@/lib/api/server";
 import { ROLES } from "@/types/auth";
 import type { Booking } from "@/types/booking";
@@ -54,9 +53,7 @@ function StatCard({
 }
 
 export default async function DashboardPage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("dnce_access_token")?.value ?? "";
-  const user = decodeToken(token);
+  const user = await getAuthUser();
 
   const isInstructor = user?.role === ROLES.INSTRUCTOR;
   const greeting = getGreeting();

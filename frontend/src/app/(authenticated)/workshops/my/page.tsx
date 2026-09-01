@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
-import { decodeToken } from "@/lib/auth/decode-token";
+import { getAuthUser } from "@/lib/auth/server-token";
 import { serverFetch } from "@/lib/api/server";
 import { ROLES } from "@/types/auth";
 import type { Workshop } from "@/types/workshop";
@@ -9,9 +8,7 @@ import { CreateWorkshopButton, WorkshopTabView } from "./_components";
 export const metadata = { title: "My Workshops — DanceHub" };
 
 export default async function MyWorkshopsPage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("dnce_access_token")?.value;
-  const user = token ? decodeToken(token) : null;
+  const user = await getAuthUser();
   if (user?.role !== ROLES.INSTRUCTOR) redirect("/workshops");
 
   let workshops: Workshop[] = [];

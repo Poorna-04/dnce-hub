@@ -1,5 +1,4 @@
-import { cookies } from "next/headers";
-import { decodeToken } from "@/lib/auth/decode-token";
+import { getAuthUser } from "@/lib/auth/server-token";
 import { serverFetch } from "@/lib/api/server";
 import type { Booking } from "@/types/booking";
 import type { RegisteredWorkshop } from "@/types/workshop";
@@ -10,9 +9,7 @@ import { BookingsTabView } from "./_components";
 export const metadata = { title: "My Bookings — DanceHub" };
 
 export default async function BookingsPage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("dnce_access_token")?.value;
-  const user = token ? decodeToken(token) : null;
+  const user = await getAuthUser();
   const role: Role = user?.role ?? ROLES.STUDENT;
 
   let upcoming: Booking[] = [];

@@ -1,10 +1,10 @@
-import { cookies } from "next/headers";
 import type { ApiResponse } from "@/types/api";
 import { SPRING_API_BASE } from "@/lib/api/env";
+import { getAccessToken } from "@/lib/auth/server-token";
 
 /**
  * Fetches a Spring Boot endpoint from a Server Component.
- * Automatically attaches the access token from the current user's cookie
+ * Automatically attaches the access token (middleware header or cookie)
  * when `requireAuth` is true (default: false for public endpoints).
  */
 export async function serverFetch<T>(
@@ -19,8 +19,7 @@ export async function serverFetch<T>(
   };
 
   if (requireAuth) {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("dnce_access_token")?.value;
+    const token = await getAccessToken();
     if (token) headers["Authorization"] = `Bearer ${token}`;
   }
 

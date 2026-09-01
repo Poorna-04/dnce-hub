@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
+import { ACCESS_COOKIE, REFRESH_COOKIE } from "@/lib/auth/cookies";
 
 export async function POST() {
   const res = NextResponse.json({ ok: true });
-  res.cookies.delete("dnce_access_token");
-  res.cookies.delete("dnce_refresh_token");
+  res.cookies.delete(ACCESS_COOKIE);
+  res.cookies.delete(REFRESH_COOKIE);
   return res;
 }

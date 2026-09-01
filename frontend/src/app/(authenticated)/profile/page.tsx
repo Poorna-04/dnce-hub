@@ -1,5 +1,4 @@
-import { cookies } from "next/headers";
-import { decodeToken } from "@/lib/auth/decode-token";
+import { getAuthUser } from "@/lib/auth/server-token";
 import { serverFetch } from "@/lib/api/server";
 import { ROLES } from "@/types/auth";
 import type { InstructorProfile, AvailabilitySlot } from "@/types/instructor";
@@ -9,9 +8,7 @@ import { InstructorProfileForm, StudentProfileForm, AvailabilityManager } from "
 export const metadata = { title: "My Profile — DanceHub" };
 
 export default async function ProfilePage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("dnce_access_token")?.value;
-  const user = token ? decodeToken(token) : null;
+  const user = await getAuthUser();
 
   const isInstructor = user?.role === ROLES.INSTRUCTOR;
 

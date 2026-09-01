@@ -1,9 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Clock, MapPin, Monitor, Users } from "lucide-react";
-import { cookies } from "next/headers";
 import { serverFetch } from "@/lib/api/server";
-import { decodeToken } from "@/lib/auth/decode-token";
+import { getAuthUser } from "@/lib/auth/server-token";
 import { ROLES } from "@/types/auth";
 import type { Workshop } from "@/types/workshop";
 import { STATUS_LABEL, STATUS_STYLE } from "@/types/workshop";
@@ -36,9 +35,7 @@ export default async function WorkshopDetailPage({ params }: PageProps) {
   }
 
   // Check if the current student is already registered
-  const cookieStore = await cookies();
-  const token = cookieStore.get("dnce_access_token")?.value;
-  const user = token ? decodeToken(token) : null;
+  const user = await getAuthUser();
   let isRegistered = false;
 
   if (user?.role === ROLES.STUDENT) {
